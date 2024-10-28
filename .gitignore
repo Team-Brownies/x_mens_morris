@@ -27,3 +27,15 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+.idea/libraries/bio_singa_javafx.xml
+.idea/libraries/bluecatcode_junit_4_10_extended.xml
+.idea/libraries/javafx_sdk_23.xml
+.idea/libraries/openjfx_javafx_base.xml
+.idea/libraries/openjfx_javafx_base22.xml
+.idea/libraries/openjfx_javafx_controls.xml
+.idea/libraries/openjfx_javafx_graphics.xml
+.idea/misc.xml
+.idea/uiDesigner.xml
+.idea/misc.xml
+.idea/misc.xml
+*.iml
