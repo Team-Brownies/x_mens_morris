@@ -166,33 +166,41 @@ public class GUI extends Application {
 		private void highlightCells(){
 			for (int row = 0; row < gameSize; row++)
 				for (int col = 0; col < gameSize; col++)
-					if (game.getCell(row, col) == NMMGame.Cell.MOVEVALID)
+					if ((game.getCell(row, col) == NMMGame.Cell.MOVEVALID
+							&& game.getCurrentGamestate() == NMMGame.GameState.MOVING)
+							|| (game.getCell(row, col) == NMMGame.Cell.EMPTY
+							&& game.getCurrentGamestate() == NMMGame.GameState.FLYING))
 						gameSpaces[row][col].point.setStroke(Color.GREEN);
 					else
 						gameSpaces[row][col].point.setStroke(Color.TRANSPARENT);
 		}
 
 		private void handleMouseClick() {
-			GameSpace movingGP = getMovingGamePiece();
 			char turnPlayerColor = game.getTurnPlayer().getColor();
 			if (game.getCurrentGamestate() == NMMGame.GameState.PLACING){
 				game.placePiece(this.row, this.col);
-			} else if (game.getCurrentGamestate() == NMMGame.GameState.MOVING ) {
-				if (this.color == turnPlayerColor) {
-					if (movingGP!=null) {
-						movingGP.gamePiece.setStroke(Color.TRANSPARENT);
-						game.clearHighlightCells();
-					}
-					setMovingGamePiece(this);
-					this.gamePiece.setStroke(Color.GREEN);
-					game.findAdjacentCells(row, col);
-					highlightCells();
-				} else if (game.getCell(this.row, this.col) == NMMGame.Cell.MOVEVALID)
-					game.movePiece(this.row, this.col, movingGP.row, movingGP.col);
-				highlightCells();
+			} else if (game.getCurrentGamestate() == NMMGame.GameState.MOVING ||
+					game.getCurrentGamestate() == NMMGame.GameState.FLYING) {
+				handleMovingFlying(turnPlayerColor);
 			}
 			updateCells();
 			updateGameStatus();
+		}
+		private void handleMovingFlying(char turnPlayerColor) {
+			GameSpace movingGP = getMovingGamePiece();
+			if (this.color == turnPlayerColor) {
+				if (movingGP!=null) {
+					movingGP.gamePiece.setStroke(Color.TRANSPARENT);
+					game.clearHighlightCells();
+				}
+				setMovingGamePiece(this);
+				this.gamePiece.setStroke(Color.GREEN);
+				if (game.getCurrentGamestate() == NMMGame.GameState.MOVING )
+					game.findAdjacentCells(row, col);
+				highlightCells();
+			} else if (game.getCell(this.row, this.col) == game.movingOrFlying())
+				game.movePiece(this.row, this.col, movingGP.row, movingGP.col);
+			highlightCells();
 		}
 	}
 

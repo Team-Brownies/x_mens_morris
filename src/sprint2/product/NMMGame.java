@@ -85,8 +85,8 @@ public class NMMGame {
 			else
 				this.grid[row][col] = Cell.BLUE;
 			this.turnPlayer.getGamePiece(row, col);
-			this.updateGameState();
 			this.changeTurn();
+			this.updateGameState();
 			System.out.println(canPlayerMovePiece());
 			if (!canPlayerMovePiece()){
 				//turnPlayer loses
@@ -118,6 +118,12 @@ public class NMMGame {
 			else if (getCell(ud_mag, rl_mag) != Cell.INVALID)
 				break;
 		}
+	}
+
+	public Cell movingOrFlying(){
+		Cell cell;
+		cell = (this.currentGamestate == NMMGame.GameState.MOVING) ? NMMGame.Cell.MOVEVALID : Cell.EMPTY;
+		return cell;
 	}
 
 	public void movePiece(int row, int col, int movingRow, int movingCol) {
@@ -167,8 +173,13 @@ public class NMMGame {
 	}
 
 	public void updateGameState(){
+		System.out.println(this.currentGamestate);
+		System.out.println(this.turnPlayer.totalNumberOfPieces());
 		if (this.redPlayer.numberOfGamePieces() == 0 && this.bluePlayer.numberOfGamePieces() == 0)
 			this.currentGamestate = GameState.MOVING;
+		if (this.turnPlayer.totalNumberOfPieces() <= 3 && this.currentGamestate == GameState.MOVING) {
+			this.currentGamestate = GameState.FLYING;
+		}
 	}
 
 	public void changeTurn() {

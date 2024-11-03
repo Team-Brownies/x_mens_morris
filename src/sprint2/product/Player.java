@@ -21,6 +21,10 @@ public class Player {
         return gamePieces.size();
     }
 
+    public int totalNumberOfPieces() {
+        return boradPieces.size()+gamePieces.size();
+    }
+
     public void getGamePiece(int row, int col) {
         GamePiece gamePiece;
         if (gamePieces.peek()!=null){
@@ -45,4 +49,5 @@ public class Player {
     public void setBoradPieces(List<GamePiece> boradPieces) {
         this.boradPieces = boradPieces;
     }
+
 }
