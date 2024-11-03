@@ -50,4 +50,10 @@ public class Player {
         this.boradPieces = boradPieces;
     }
 
+    public void setGamePiecesForFlying(){
+        while(this.numberOfGamePieces()>3){
+            gamePieces.pop();
+        }
+    }
+
 }

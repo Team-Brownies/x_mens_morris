@@ -79,7 +79,7 @@ public class NMMGame {
 	}
 
 	public boolean placePiece(int row, int col) {
-		if (getCell(row, col)== Cell.EMPTY){
+		if (getCell(row, col)== Cell.EMPTY||getCell(row,col)==Cell.MOVEVALID){
 			if (this.turnPlayer.getColor() == 'R')
 				this.grid[row][col] = Cell.RED;
 			else
@@ -127,10 +127,10 @@ public class NMMGame {
 	}
 
 	public void movePiece(int row, int col, int movingRow, int movingCol) {
-		this.grid[movingRow][movingCol] = Cell.EMPTY;
-		this.grid[row][col] = Cell.EMPTY;
-		placePiece(row,col);
-		clearHighlightCells();
+		if (placePiece(row,col)) {
+			this.grid[movingRow][movingCol] = Cell.EMPTY;
+			clearHighlightCells();
+		}
 	}
 
 	public boolean canPlayerMovePiece(){

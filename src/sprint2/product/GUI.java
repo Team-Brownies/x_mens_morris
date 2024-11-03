@@ -23,7 +23,7 @@ public class GUI extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		if (game == null) {
-			game = new NMMGame(5);
+			game = new NMMGame(9);
 		}
 		updateGameStatus();
 		gameSize = game.getSize();
