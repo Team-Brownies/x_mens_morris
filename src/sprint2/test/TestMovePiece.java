@@ -53,7 +53,7 @@ public class TestMovePiece {
 
 	// acceptance criterion 4.2
 	@Test
-	public void testMovePieceOnNonEmptyCell() {
+	public void testMovePieceToNonEmptyCell() {
 		NMMGame.Cell beforeMove;
 		assertEquals("", board.getCurrentGamestate(), NMMGame.GameState.MOVING);
 

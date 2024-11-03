@@ -41,7 +41,7 @@ public class TestFlyPiece {
 
 	// acceptance criterion 5.2
 	@Test
-	public void testFlyPieceOnNonEmptyCell() {
+	public void testFlyPieceToNonEmptyCell() {
 		NMMGame.Cell beforeMove;
 		assertEquals("", board.getCurrentGamestate(), NMMGame.GameState.FLYING);
 
