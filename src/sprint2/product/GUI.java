@@ -1,5 +1,7 @@
 package sprint2.product;
 
+import javafx.animation.Interpolator;
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -164,12 +166,10 @@ public class GUI extends Application {
 		}
 
 		private void highlightCells(){
+			GameSpace movingGP = getMovingGamePiece();
 			for (int row = 0; row < gameSize; row++)
 				for (int col = 0; col < gameSize; col++)
-					if ((game.getCell(row, col) == NMMGame.Cell.MOVEVALID
-							&& game.getCurrentGamestate() == NMMGame.GameState.MOVING)
-							|| (game.getCell(row, col) == NMMGame.Cell.EMPTY
-							&& game.getCurrentGamestate() == NMMGame.GameState.FLYING))
+					if (game.getCell(row, col) == game.movingOrFlying() && movingGP != null)
 						gameSpaces[row][col].point.setStroke(Color.GREEN);
 					else
 						gameSpaces[row][col].point.setStroke(Color.TRANSPARENT);
@@ -198,9 +198,36 @@ public class GUI extends Application {
 				if (game.getCurrentGamestate() == NMMGame.GameState.MOVING )
 					game.findAdjacentCells(row, col);
 				highlightCells();
-			} else if (game.getCell(this.row, this.col) == game.movingOrFlying())
-				game.movePiece(this.row, this.col, movingGP.row, movingGP.col);
+			} else if (game.getCell(this.row, this.col) == game.movingOrFlying() && movingGP != null) {
+				animateMovePiece(this, movingGP);
+				setMovingGamePiece(null);
+			}
 			highlightCells();
+		}
+
+		private void animateMovePiece(GameSpace gp, GameSpace movingGP) {
+			int rowDiff = gp.row-movingGP.row;
+			int colDiff = gp.col-movingGP.col;
+
+			TranslateTransition transition = new TranslateTransition();
+			movingGP.toFront();
+			transition.setNode(movingGP.gamePiece);
+			transition.setToX(movingGP.gamePiece.getCenterX()*colDiff*2);
+			transition.setToY(movingGP.gamePiece.getCenterY()*rowDiff*2);
+			transition.setInterpolator(Interpolator.LINEAR);
+			transition.play();
+
+			movingGP.gamePiece.setTranslateX(0);
+			movingGP.gamePiece.setTranslateY(0);
+
+			transition.setOnFinished(event -> {
+				movingGP.gamePiece.setTranslateX(0);
+				movingGP.gamePiece.setTranslateY(0);
+				game.movePiece(gp.row, gp.col, movingGP.row, movingGP.col);
+				updateCells();
+				updateGameStatus();
+			});
+
 		}
 	}
 

@@ -87,7 +87,6 @@ public class NMMGame {
 			this.turnPlayer.getGamePiece(row, col);
 			this.changeTurn();
 			this.updateGameState();
-			System.out.println(canPlayerMovePiece());
 			if (!canPlayerMovePiece()){
 				//turnPlayer loses
 				setCurrentGamestate(NMMGame.GameState.GAMEOVER);
@@ -135,7 +134,6 @@ public class NMMGame {
 
 	public boolean canPlayerMovePiece(){
 		List<GamePiece> pieces = this.turnPlayer.getBoradPieces();
-		System.out.println(this.turnPlayer.getColor());
 		if (this.turnPlayer.getGamePieces().isEmpty()) {
 			for (GamePiece p : pieces) {
 				p.getLocation();
@@ -159,7 +157,6 @@ public class NMMGame {
 			rl_mag = col+(i*rl);
 			ud_mag = row+(i*ud);
 			if(getCell(ud_mag, rl_mag) == Cell.EMPTY) {
-				System.out.println("("+row+", "+col+") to ("+ud_mag+", "+rl_mag+")");
 				return true;
 			}
 		}
@@ -173,8 +170,6 @@ public class NMMGame {
 	}
 
 	public void updateGameState(){
-		System.out.println(this.currentGamestate);
-		System.out.println(this.turnPlayer.totalNumberOfPieces());
 		if (this.redPlayer.numberOfGamePieces() == 0 && this.bluePlayer.numberOfGamePieces() == 0)
 			this.currentGamestate = GameState.MOVING;
 		if (this.turnPlayer.totalNumberOfPieces() <= 3 && this.currentGamestate == GameState.MOVING) {
