@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import sprint2.product.Cell;
 import sprint2.product.NMMGame;
 
 public class TestFlyPiece {
@@ -34,15 +35,15 @@ public class TestFlyPiece {
 	public void testFlyPieceToEmptyCell() {
 		assertEquals("", board.getCurrentGamestate(), NMMGame.GameState.FLYING);
 		board.movePiece(3, 0, 0, 0);
-		assertEquals("", board.getCell(3, 0), NMMGame.Cell.RED);
-		assertEquals("", board.getCell(0, 0), NMMGame.Cell.EMPTY);
+		assertEquals("", board.getCell(3, 0), Cell.RED);
+		assertEquals("", board.getCell(0, 0), Cell.EMPTY);
 		assertEquals("", board.getTurnPlayer().getColor(), 'B');
 	}
 
 	// acceptance criterion 5.2
 	@Test
 	public void testFlyPieceToNonEmptyCell() {
-		NMMGame.Cell beforeMove;
+		Cell beforeMove;
 		assertEquals("", board.getCurrentGamestate(), NMMGame.GameState.FLYING);
 
 		beforeMove = board.getCell(1, 1);
@@ -50,7 +51,7 @@ public class TestFlyPiece {
 		board.movePiece(1, 1, 0, 0);
 
 		assertSame(board.getCell(1, 1), beforeMove);
-		assertEquals("", board.getCell(0, 0), NMMGame.Cell.RED);
+		assertEquals("", board.getCell(0, 0), Cell.RED);
 		assertEquals("", board.getTurnPlayer().getColor(), 'R');
 	}
 }

@@ -4,9 +4,6 @@ import java.util.List;
 
 public class NMMGame {
 
-	public enum Cell {
-		INVALID, EMPTY, BLUE, RED, MOVEVALID
-	}
 	public enum GameMode {
 		NINE, FIVE
 	}
@@ -16,6 +13,7 @@ public class NMMGame {
 	private Cell[][] grid;
 	private GameState currentGamestate;
 	private Player turnPlayer;
+	private Player opponentPlayer;
 	private int size;
 	private Player redPlayer;
 	private Player bluePlayer;
@@ -36,6 +34,7 @@ public class NMMGame {
 		this.redPlayer = new Player('R',pieces);
 		this.bluePlayer = new Player('B',pieces);
 		this.turnPlayer = this.redPlayer;
+		this.opponentPlayer = this.bluePlayer;
 		this.currentGamestate = GameState.PLACING;
 	}
 
@@ -79,18 +78,28 @@ public class NMMGame {
 	}
 
 	public boolean placePiece(int row, int col) {
+		CheckMill millChecker = new CheckMill(this.grid);
 		if (getCell(row, col)== Cell.EMPTY||getCell(row,col)==Cell.MOVEVALID){
 			if (this.turnPlayer.getColor() == 'R')
 				this.grid[row][col] = Cell.RED;
 			else
 				this.grid[row][col] = Cell.BLUE;
 			this.turnPlayer.getGamePiece(row, col);
-			this.changeTurn();
-			this.updateGameState();
+
+			//don't change the turn if the player has formed the mill
+			if(millChecker.checkMillAllDireactions(row, col)){
+				setCurrentGamestate(GameState.MILLING);
+			}
+			else{
+				this.changeTurn();
+				this.updateGameState();
+			}
 			if (!canPlayerMovePiece()){
 				//turnPlayer loses
-				setCurrentGamestate(NMMGame.GameState.GAMEOVER);
+				setCurrentGamestate(GameState.GAMEOVER);
 			}
+
+			this.gameOver();
 			return true;
 		}
 		return false;
@@ -121,8 +130,59 @@ public class NMMGame {
 
 	public Cell movingOrFlying(){
 		Cell cell;
-		cell = (this.currentGamestate == NMMGame.GameState.MOVING) ? NMMGame.Cell.MOVEVALID : Cell.EMPTY;
+		cell = (this.currentGamestate == GameState.MOVING) ? Cell.MOVEVALID : Cell.EMPTY;
 		return cell;
+	}
+	private Cell getPlayerTag(char playerColor){
+		if(playerColor == 'R'){
+			return Cell.RED;
+		}
+		else{
+			return Cell.BLUE;
+		}
+	}
+	private Cell getOpponentTag(char playerColor){
+		if(playerColor == 'R'){
+			return Cell.BLUE;
+		}
+		else {
+			return Cell.RED;
+		}
+	}
+	public boolean getOppFreePieces(){
+		CheckMill millChecker = new CheckMill(this.grid);
+		for(int i = 0; i < this.grid.length; i++){
+			for(int j = 0; j < this.grid.length; j++){
+				if(getCell(i, j) == getOpponentTag(turnPlayer.getColor())){
+					if(!millChecker.checkMillAllDireactions(i, j)){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	public boolean removePiece(int row, int col) {
+		CheckMill millChecker = new CheckMill(this.grid);
+		//prevent player from removing their own piece
+		if(getCell(row, col) == getPlayerTag(turnPlayer.getColor())){
+			return false;
+		}
+		else{
+			//prevent player from removing the pieces in the mill
+			if(millChecker.checkMillAllDireactions(row, col) && getOppFreePieces()){
+				return false;
+			}
+			else{
+				grid[row][col] = Cell.EMPTY;
+				this.opponentPlayer.removeBoradPiece(row, col); //removing the players piece from the pieces list
+				this.updateGameState();
+
+				this.gameOver();
+				this.changeTurn();
+				return true; //player can remove the opp player piece nit in the mill
+			}
+		}
 	}
 
 	public void movePiece(int row, int col, int movingRow, int movingCol) {
@@ -172,13 +232,17 @@ public class NMMGame {
 	public void updateGameState(){
 		if (this.redPlayer.numberOfGamePieces() == 0 && this.bluePlayer.numberOfGamePieces() == 0)
 			this.currentGamestate = GameState.MOVING;
-		if (this.turnPlayer.totalNumberOfPieces() <= 3 && this.currentGamestate == GameState.MOVING) {
+		if (this.redPlayer.numberOfGamePieces() != 0 && this.bluePlayer.numberOfGamePieces() != 0)
+			this.currentGamestate = GameState.PLACING;
+		System.out.println(opponentPlayer.getColor());
+		if (this.opponentPlayer.numberOfBoradPieces() <= 3 && this.currentGamestate == GameState.MOVING) {
 			this.currentGamestate = GameState.FLYING;
 		}
 	}
 
 	public void changeTurn() {
 		this.turnPlayer = (this.turnPlayer.getColor() == 'R') ? this.bluePlayer : this.redPlayer;
+		this.opponentPlayer = (this.opponentPlayer.getColor() == 'B') ? this.redPlayer : this.bluePlayer;
 	}
 
 	public GameState getCurrentGamestate() {
@@ -199,5 +263,65 @@ public class NMMGame {
 
 	public GameMode getGameMode() {
 		return gameMode;
+	}
+
+	public void gameOver() {
+
+		if(currentGamestate == GameState.MOVING || currentGamestate == GameState.FLYING) {
+			Cell PlayerColor = Cell.EMPTY;
+			if(this.turnPlayer.getColor() == 'R'){
+				PlayerColor = Cell.RED;
+			}
+			else{
+				PlayerColor = Cell.BLUE;
+			}
+			System.out.println(turnPlayer.numberOfBoradPieces());
+			System.out.println(this.opponentPlayer.numberOfBoradPieces());
+			if (this.opponentPlayer.numberOfBoradPieces() < 3) {
+				System.out.println("legalMove");
+				System.out.println(LegalMove(PlayerColor));
+				System.out.println(turnPlayer.numberOfBoradPieces());
+				if (this.turnPlayer.getColor() == 'R') {
+					this.currentGamestate = GameState.GAMEOVER;
+				} else {
+					this.currentGamestate = GameState.GAMEOVER;
+					System.out.println("Red player won");
+				}
+			} else {
+				if(!LegalMove(PlayerColor))
+					this.currentGamestate = GameState.GAMEOVER;
+			}
+		}
+	}
+	private boolean LegalMove(Cell PlayerColor) {
+		for(int i = 0; i < this.grid.length; i++){
+			for(int j = 0; j < this.grid[i].length; j++){
+				if(grid[i][j] == PlayerColor){
+					if (checkAdjPos(i, j)) {
+						System.out.println("row: "+i+" col:"+j);
+						return true; // Found a legal move
+					} //check again
+				}
+			}
+		}
+		return false;
+	}
+	private boolean checkAdjPos(int x, int y){
+		//  direactions (up, down, left, right)
+		int[][] directions = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
+
+		for (int[] dir : directions) {
+			int newX = x + dir[0];
+			int newY = y + dir[1];
+
+			// Check if the new position is within bounds and empty
+			if (isWithinBounds(newX, newY) && grid[newX][newY] == Cell.EMPTY) {
+				return true;
+			}
+		}
+		return false;
+	}
+	private boolean isWithinBounds(int x, int y) {
+		return x >= 0 && x < grid.length && y >= 0 && y < grid[0].length;
 	}
 }

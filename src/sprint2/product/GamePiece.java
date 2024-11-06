@@ -20,4 +20,9 @@ public class GamePiece {
     public String getIdByLocation(int row, int col) {
         return id;
     }
+
+    public boolean getPieceByLocation(int row, int col) {
+        //returns true if this piece is at the given location
+        return this.row == row && this.col == col;
+    }
 }

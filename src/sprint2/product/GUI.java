@@ -3,15 +3,15 @@ package sprint2.product;
 import javafx.animation.Interpolator;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 
 
 public class GUI extends Application {
@@ -33,7 +33,7 @@ public class GUI extends Application {
 		gameSpaces = new GameSpace[gameSize][gameSize];
 		for (int row = 0; row < gameSize; row++)
 			for (int col = 0; col < gameSize; col++)
-				if (game.getCell(row, col) == NMMGame.Cell.EMPTY)
+				if (game.getCell(row, col) == Cell.EMPTY)
 					pane.add(gameSpaces[row][col] = new GameSpace(row,col, true), col, row);
 				else
 					pane.add(gameSpaces[row][col] = new GameSpace(row,col, false), col, row);
@@ -182,9 +182,12 @@ public class GUI extends Application {
 			} else if (game.getCurrentGamestate() == NMMGame.GameState.MOVING ||
 					game.getCurrentGamestate() == NMMGame.GameState.FLYING) {
 				handleMovingFlying(turnPlayerColor);
+			} else if (game.getCurrentGamestate() == NMMGame.GameState.MILLING){
+				game.removePiece(this.row, this.col);
 			}
 			updateCells();
 			updateGameStatus();
+			//System.out.println(game.getCurrentGamestate());
 		}
 		private void handleMovingFlying(char turnPlayerColor) {
 			GameSpace movingGP = getMovingGamePiece();
@@ -232,7 +235,7 @@ public class GUI extends Application {
 	}
 
 	private void updateCells() {
-		NMMGame.Cell cell;
+		Cell cell;
 		Circle gamePiece;
 		char color;
 
@@ -241,11 +244,11 @@ public class GUI extends Application {
 				cell = game.getCell(row, col);
 				gamePiece = gameSpaces[row][col].gamePiece;
 
-				if (cell == NMMGame.Cell.RED) {
+				if (cell == Cell.RED) {
 					gamePiece.setFill(Color.RED);
 					color = 'R';
 				}
-				else if (cell == NMMGame.Cell.BLUE)  {
+				else if (cell == Cell.BLUE)  {
 					gamePiece.setFill(Color.BLUE);
 					color = 'B';
 				} else {
