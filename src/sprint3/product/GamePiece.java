@@ -14,68 +14,77 @@ public class GamePiece {
     private final Game game;
     private Cell cellState = Cell.MOVEVALID;
 
+    // a game piece use on game spaces
     public GamePiece(int i, char color, Game game) {
         this.id = color+String.valueOf(i);
         this.game = game;
     }
 
+    // set the coords of this game piece
     public void setLocation(int row, int col) {
         this.location[0] = row;
         this.location[1] = col;
         this.updateValidMovesLocations();
     }
 
+    // set the coords (with an array) of this game piece
     public void setLocation(int[] location) {
         this.location = location;
     }
 
+    // get the coord of this game piece
     public int[] getLocation() {
         return location;
     }
 
-    public String getIdByLocation(int row, int col) {
-        return id;
-    }
-
+    // get id a game piece
     public String getId() {
         return id;
     }
 
+    // is this game piece in play or have it been milled
     public boolean isInPlay() {
         return inPlay;
     }
 
+    // returns turn if this game piece is at the given coords
     public boolean getPieceByLocation(int row, int col) {
         //returns true if this piece is at the given location
         return this.location[0] == row && this.location[1] == col;
     }
 
+    // removes the piece from play
     public void removeFromPlay() {
         this.inPlay = false;
-        //give out of play Location
+        //update location to one that is not in play
         this.setLocation(-1,-1);
         this.updateValidMovesLocations();
     }
+
+    // prints the location of game piece
     public void printLocation(){
         if (this.inPlay)
             System.out.println("ID: "+id+" ("+ this.location[0]+", "+this.location[1]+")");
     }
 
+    // return list of space the game piece is able to move to
     public List<int[]> getValidMovesLocations() {
         return validMovesLocations;
     }
 
+    // changes the cell type this game piece is looking
+    // for with it searches for a Valid Moves Locations
     public void setCellStateForFlying() {
         this.cellState = Cell.EMPTY;
     }
 
+    // update list of Valid Moves Locations
     public void updateValidMovesLocations() {
         List<int[]> validMoves;
 
-        game.clearHighlightCells();
+        game.clearMoveValids();
 
         this.clearValidMovesLocation();
-
 
         // only findAdjacentCells for inPlay Pieces
         if (inPlay){
@@ -91,10 +100,12 @@ public class GamePiece {
         }
     }
 
+    // clear list of Valid Moves Locations
     public void clearValidMovesLocation() {
         this.validMovesLocations.clear();
     }
 
+    // prints list of Valid Moves Locations
     public void printValidMoves() {
         for (int[] move:validMovesLocations){
             System.out.println("("+move[0]+", "+move[1]+")");

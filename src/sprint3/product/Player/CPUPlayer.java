@@ -8,23 +8,22 @@ import sprint3.product.Game.Game;
 import sprint3.product.Game.GameState;
 import sprint3.product.GamePiece;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class CPUPlayer extends Player{
     private Game game;
     private int gridSize;
-    private boolean cpu;
 
+    // changes player so a cpu can control
     public CPUPlayer(char color, int pieces, Game game) {
         super(color, pieces, game);
-        setCpu(true);
+        setToCpu();
         this.game = this.getGame();
         this.gridSize = this.game.getSize();
     }
 
-    public int[] findMillMove(int[] move, Cell[][] tempGrid, Cell tag){
+    // find a move that will result in a mill be formed
+    private int[] findMillMove(int[] move, Cell[][] tempGrid, Cell tag){
         CheckMill millChecker;
         tempGrid[move[0]][move[1]] = tag;
 
@@ -36,26 +35,15 @@ public class CPUPlayer extends Player{
         return null;
     }
 
-    public List<int[]> getValidCells(Cell cellType){
-        Cell[][] grid = this.game.getGrid();
-        List<int[]> cells = new ArrayList<>();
-
-        for (int row = 0; row < this.gridSize; row++) {
-            for (int col = 0; col < this.gridSize; col++) {
-                if (grid[row][col] == cellType) {
-                    cells.add(new int[]{row, col});
-                }
-            }
-        }
-        return cells;
-    }
-
-    public int getRandom(int n){
+    // generates random number to pick from list of valid moves
+    private int getRandom(int n){
         int random = 0;
 
         random = (int) (Math.random() * n);
         return random;
     }
+
+    // make a temp grid to test outcome of a possible move
     private Cell[][] makeTempGrid(){
         Cell[][] grid = this.game.getGrid();
         return Arrays.stream(grid)
@@ -63,12 +51,13 @@ public class CPUPlayer extends Player{
                 .toArray(Cell[][]::new);
     }
 
-    public int[] genPlace(){
+    // generates coords the best move to make this turn
+    private int[] genPlace(){
         int[] millMove = null;
         int[] blockMove = null;
 
-        List<int[]> possibleMoves = getValidCells(Cell.EMPTY);
-        possibleMoves.addAll(getValidCells(Cell.MOVEVALID));
+        List<int[]> possibleMoves = game.getAllCellsOfAType(Cell.EMPTY);
+        possibleMoves.addAll(game.getAllCellsOfAType(Cell.MOVEVALID));
 
         //Find if Mill can be formed
         for (int[] move : possibleMoves ) {
@@ -76,10 +65,7 @@ public class CPUPlayer extends Player{
             if (blockMove == null) {
                 Cell[][] tempGrid =makeTempGrid();
                 blockMove = findMillMove(move, tempGrid, this.getOpponentTag());
-
-                System.out.println(tempGrid[0][0]+" "+tempGrid[0][3]+" "+tempGrid[0][6]);
             }
-            System.out.println("place block move "+Arrays.toString(blockMove));
             //Form First Mill found
             if (millMove!=null)
                 return millMove;
@@ -91,67 +77,95 @@ public class CPUPlayer extends Player{
         return  possibleMoves.get(getRandom(possibleMoves.size()));
     }
 
-    public int[][] genMove(){
+    // generates coords the best move to make this turn
+    private int[][] genMove(){
         List<GamePiece> playersBoardPieces = this.getBoardPieces();
-        List<GamePiece> moveablePieces = new ArrayList<>();
         int[] millMove = null;
         int[] blockMove = null;
-        int[][] returnBlocking = null;
+        int[][] returnStatement = null;
 
-        //Update List of Valid Moves Locations for each game Piece
-        for (GamePiece piece : playersBoardPieces){
-            piece.updateValidMovesLocations();
-            if(!piece.getValidMovesLocations().isEmpty()) {
-                moveablePieces.add(piece);
-            }
+        List<GamePiece> movablePieces = playersMovablePieces(this);
+        // return Mill if found
+        returnStatement = findMillOrBlock(this, "Mill");
+        // if mill is not found search for a block
+        if (returnStatement==null) {
+            returnStatement = findMillOrBlock(this, "Block");
+        }
+        // Make random move if no mill or block is possible
+        if (returnStatement==null) {
+            GamePiece randomPiece = movablePieces.get(getRandom(movablePieces.size()));
+            List<int[]> piecesMoves = randomPiece.getValidMovesLocations();
+            int[] randomMove = piecesMoves.get(getRandom(piecesMoves.size()));
+            return new int[][]{randomPiece.getLocation(), randomMove};
         }
 
-        //Checks to see if a mill can be form or block
-        for (GamePiece piece : playersBoardPieces){
+        return returnStatement;
+    }
+
+    private int[][] findMillOrBlock(Player player, String type) {
+        int[] millMove = null;
+        int[] blockMove = null;
+        List<GamePiece> movablePieces = playersMovablePieces(player);
+
+        Cell playerTag = player.getPlayerTag();
+        Cell oppTag = player.getOpponentTag();
+
+
+        for (GamePiece piece : movablePieces){
             int[] coords = piece.getLocation();
-            int[] blockingCoords = null;
             List<int[]> validMoveSpaces = piece.getValidMovesLocations();
 
             for (int[] newSpace : validMoveSpaces){
                 Cell[][] tempGrid = makeTempGrid();
                 tempGrid[coords[0]][coords[1]] = Cell.EMPTY;
-
-                millMove = findMillMove(newSpace, tempGrid, this.getPlayerTag());
-
-                tempGrid = makeTempGrid();
-                tempGrid[coords[0]][coords[1]] = Cell.EMPTY;
-
-                if (blockMove == null) {
-                    blockMove = findMillMove(newSpace, tempGrid, this.getOpponentTag());
-                    blockingCoords = coords;
-                }
-
-                // Make First Mill
-                if (millMove!=null)
-                    return new int[][]{coords, millMove};
-                // Save a Block Move for if no mill move is found
-                if (blockMove!=null && blockingCoords!=null) {
-                    returnBlocking = new int[][]{blockingCoords, blockMove};
+                // return Mill if found
+                switch (type){
+                    case "Mill":
+                        millMove = findMillMove(newSpace, tempGrid, playerTag);
+                        // return Mill Move if found
+                        if (millMove!=null) {
+                            return new int[][]{coords, millMove};
+                        }
+                        break;
+                    case "Block":
+                        blockMove = findMillMove(newSpace, tempGrid, oppTag);
+                        // return Block Move if found
+                        if (blockMove!=null) {
+                            return new int[][]{coords, blockMove};
+                        }
                 }
             }
 
         }
-        // Return Block Move
-        if(returnBlocking!= null){
-            return returnBlocking;
-        }
-        // Make random move if no mill or block is possible
-        GamePiece randomPiece = moveablePieces.get(getRandom(moveablePieces.size()));
-        List<int[]> piecesMoves = randomPiece.getValidMovesLocations();
-        int[] randomMove = piecesMoves.get(getRandom(piecesMoves.size()));
-
-        return new int[][]{randomPiece.getLocation(), randomMove};
+        return null;
     }
 
-    public int[] genRemove(){
+    // generates coords the best move to make this turn
+    private int[] genRemove(){
+        Set<int[]> millMates = new HashSet<>();
+        Cell[][] tempGrid = makeTempGrid();
+        CheckMill millChecker = new CheckMill(tempGrid);
         Cell[][] grid = this.game.getGrid();
-        CheckMill millChecker = new CheckMill(game.getGrid());
+        Cell oppTag = this.getOpponentTag();
+        int[] removePiece;
 
+        int[][] possibleMillMove = findMillOrBlock(this.game.getOpponentPlayer(), "Mill");
+        System.out.println("possibleMillMove");
+        System.out.println(Arrays.deepToString(possibleMillMove));
+        if (possibleMillMove!=null){
+            tempGrid[possibleMillMove[0][0]][possibleMillMove[0][1]] = Cell.EMPTY;
+            tempGrid[possibleMillMove[1][0]][possibleMillMove[1][1]] = oppTag;
+            millMates.addAll(millChecker.getMillMates(possibleMillMove[1][0], possibleMillMove[1][1]));
+            System.out.println("millMates");
+            System.out.println(millMates);
+            removePiece = millMates.stream().findFirst().orElse(null);
+            System.out.println("Arrays.toString(removePiece)");
+            System.out.println(Arrays.toString(removePiece));
+
+            return removePiece;
+        }
+        List<int[]> emptyGameSpaces = game.getAllCellsOfAType(Cell.EMPTY);
+//        List<int[]> potentialMills = new ArrayList<>;
         for (int row = 0; row < this.gridSize; row++) {
             for (int col = 0; col < this.gridSize; col++) {
                 if (grid[row][col] == this.getOpponentTag()) {
@@ -164,6 +178,8 @@ public class CPUPlayer extends Player{
         return new int[]{-1, -1};
     }
 
+    // find what type of move to make based on the game state
+    @Override
     public void makeCPUMove() {
         GameState gameState = this.getPlayersGamestate();
         Board gui = getGame().getGui();
@@ -189,11 +205,13 @@ public class CPUPlayer extends Player{
         }
     }
 
+    // places a game piece
     private void placingLogic() {
         int[] placingGP = this.genPlace();
         this.placePiece(placingGP[0], placingGP[1]);
     }
 
+    // moves a game piece
     private void movingLogic() {
         int[][] movingCoords = this.genMove();
         int[] placingGP = new int[]{movingCoords[1][0], movingCoords[1][1]};
@@ -201,6 +219,7 @@ public class CPUPlayer extends Player{
         this.movePiece(placingGP[0], placingGP[1], movingGP[0], movingGP[1]);
     }
 
+    // fly a game piece
     private void flyingLogic() {
         List<GamePiece> pieces = this.getBoardPieces();
         for (GamePiece p : pieces){

@@ -1,11 +1,56 @@
 package sprint3.product;
 
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class CheckMill {
     private final Cell[][] grid;
     public CheckMill(Cell[][] grid) {
         this.grid = grid;
 
+    }
+    public Set<int[]> getMillMates(int row, int col){
+        Set<int[]> millMates = new HashSet<>();
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        int[] coords = new int[]{row,col};
+
+        if (checkMillAllDirections(row, col)){
+            for (int[] dir : directions) {
+                millMates.addAll(searchForMillMates(dir[0], dir[1], coords));
+            }
+            System.out.println(millMates);
+        } else {
+            return null;
+        }
+        return millMates;
+    }
+    private Set<int[]> searchForMillMates(int xDirection, int yDirection, int[] coords){
+        int xMagnitude, yMagnitude;
+        int row = coords[0];
+        int col = coords[1];
+        Cell color = grid[row][col];
+        Cell testCell;
+        Set<int[]> millMates = new HashSet<>();
+
+        for (int i = 1; i <= 3; i++) {
+            xMagnitude = col+(i*xDirection);
+            yMagnitude = row+(i*yDirection);
+            System.out.println("check: "+yMagnitude+", "+xMagnitude);
+            System.out.println("grid.length: "+(grid.length-1));
+            if(xMagnitude<grid.length && yMagnitude<grid.length){
+                testCell = grid[yMagnitude][xMagnitude];
+                if(testCell == color && this.checkMillAllDirections(yMagnitude,xMagnitude)) {
+                    millMates.add(new int[]{yMagnitude,xMagnitude});
+                    break;
+                }
+                else if (testCell != Cell.INVALID)
+                    break;
+            }
+        }
+        return millMates;
     }
     public boolean checkMillAllDirections(int row, int col) {
         //check for mill around the piece in all directions

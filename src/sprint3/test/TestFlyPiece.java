@@ -5,18 +5,18 @@ import org.junit.Before;
 import org.junit.Test;
 import sprint3.product.Cell;
 import sprint3.product.Game.GameState;
-import sprint3.product.Game.NMMGame;
+import sprint3.product.Game.NineMMGame;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 public class TestFlyPiece {
 
-	private NMMGame board;
+	private NineMMGame board;
 
 	@Before
 	public void setUp() throws Exception {
-		board = new NMMGame();
+		board = new NineMMGame();
 		board.getRedPlayer().setGamePiecesForFlying();
 		board.getBluePlayer().setGamePiecesForFlying();
 		board.getTurnPlayer().placePiece(0, 0);
