@@ -7,8 +7,8 @@ public class CheckMill {
         this.grid = grid;
 
     }
-    public boolean checkMillAllDireactions(int row, int col) {
-        //check for mill around the piece in all direations
+    public boolean checkMillAllDirections(int row, int col) {
+        //check for mill around the piece in all directions
         //return true if mill is formed else false
         return checkVerticalMillDown(row, col) ||
                 checkVerticalMillTop(row, col) ||
@@ -42,10 +42,11 @@ public class CheckMill {
                 return false;
             }
             if(red_piece == 3 || blue_piece == 3){
+                System.out.println("checkVerticalMillDown");
                 return true;
             }  // return true if the mill is formed
         }
-        return false; //if the loop terminates without retun than its not mill
+        return false; //if the loop terminates without return than it's not mill
     }
     private boolean checkVerticalMillTop(int row, int col) {
         int red_piece = 0;
@@ -66,10 +67,11 @@ public class CheckMill {
                 return false;
             }
             if(red_piece == 3 || blue_piece == 3){
+                System.out.println("checkVerticalMillDown");
                 return true;
             }  // return true if the mill is formed
         }
-        return false; //if the loop terminates without retun than its not mill
+        return false; //if the loop terminates without return than it's not mill
     }
     private boolean checkHorizontalMillRight(int row, int col) {
         int red_piece = 0;
@@ -91,6 +93,7 @@ public class CheckMill {
                 return false;
             }
             if(red_piece == 3 || blue_piece == 3){
+                System.out.println("checkVerticalMillDown");
                 return true;
             }  // return true if the mill is formed
         }
@@ -115,33 +118,42 @@ public class CheckMill {
                 return false;
             }
             if(red_piece == 3 || blue_piece == 3){
+                System.out.println("checkVerticalMillDown");
                 return true;
             }  // return true if the mill is formed
         }
         return false;
     }
     private boolean checkHorizontalMillMiddle(int row, int col) {
+        boolean returnStatment = false;
         try{
-            return ((grid[row][col - 1] == Cell.RED && grid[row][col] == Cell.RED && grid[row][col + 1] == Cell.RED) ||
+            returnStatment = ((grid[row][col - 1] == Cell.RED && grid[row][col] == Cell.RED && grid[row][col + 1] == Cell.RED) ||
                     (grid[row][col - 1] == Cell.BLUE && grid[row][col] == Cell.BLUE  && grid[row][col + 1] == Cell.BLUE)) ||
                     ((grid[row][col - 2] == Cell.RED && grid[row][col] == Cell.RED && grid[row][col + 2] == Cell.RED) ||
                             (grid[row][col - 2] == Cell.BLUE && grid[row][col] == Cell.BLUE  && grid[row][col + 2] == Cell.BLUE)) ||
                     ((grid[row][col - 3] == Cell.RED && grid[row][col] == Cell.RED && grid[row][col + 3] == Cell.RED) ||
                             (grid[row][col- 3] == Cell.BLUE && grid[row][col] == Cell.BLUE && grid[row][col + 3] == Cell.BLUE));
-        } catch (ArrayIndexOutOfBoundsException e) {
-            return false;
+        } catch (ArrayIndexOutOfBoundsException _) {
         }
+        if (returnStatment)
+            System.out.println("checkHorizontalMillMiddle");
+
+        return returnStatment;
     }
     private boolean checkVerticalMillMiddle(int row, int col) {
+        boolean returnStatment = false;
         try{
-            return ((grid[row - 1][col] == Cell.RED && grid[row][col] == Cell.RED && grid[row + 1][col] == Cell.RED) ||
+            returnStatment = ((grid[row - 1][col] == Cell.RED && grid[row][col] == Cell.RED && grid[row + 1][col] == Cell.RED) ||
                     (grid[row - 1][col] == Cell.BLUE && grid[row][col] == Cell.BLUE  && grid[row + 1][col] == Cell.BLUE)) ||
                     ((grid[row - 2][col] == Cell.RED && grid[row][col] == Cell.RED && grid[row + 2][col] == Cell.RED) ||
                             (grid[row - 2][col] == Cell.BLUE && grid[row][col] == Cell.BLUE  && grid[row + 2][col] == Cell.BLUE)) ||
                     ((grid[row - 3][col] == Cell.RED && grid[row][col] == Cell.RED && grid[row + 3][col] == Cell.RED) ||
                             (grid[row - 3][col] == Cell.BLUE && grid[row][col] == Cell.BLUE && grid[row + 3][col] == Cell.BLUE));
-        } catch (ArrayIndexOutOfBoundsException e) {
-            return false;
+        } catch (ArrayIndexOutOfBoundsException _) {
         }
+        if (returnStatment)
+            System.out.println("checkVerticalMillMiddle");
+
+        return returnStatment;
     }
 }

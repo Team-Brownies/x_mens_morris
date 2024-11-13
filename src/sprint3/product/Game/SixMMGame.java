@@ -1,5 +1,7 @@
 package sprint3.product.Game;
 
+import sprint3.product.Player.Player;
+
 public class SixMMGame extends Game {
 
 	private static final int PIECES = 6;
@@ -10,9 +12,10 @@ public class SixMMGame extends Game {
 	}
 
 	public void updateGameState(){
-		if (this.getRedPlayer().numberOfGamePieces() == 0 && this.getBluePlayer().numberOfGamePieces() == 0)
-			this.setCurrentGamestate(GameState.MOVING);
-		if (this.getRedPlayer().numberOfGamePieces() != 0 && this.getBluePlayer().numberOfGamePieces() != 0)
-			this.setCurrentGamestate(GameState.PLACING);
+		Player turnPlayer = this.getTurnPlayer();
+		if (turnPlayer.numberOfGamePieces() == 0 )
+			turnPlayer.setPlayersGamestate(GameState.MOVING);
+		if (turnPlayer.numberOfGamePieces() != 0)
+			turnPlayer.setPlayersGamestate(GameState.PLACING);
 	}
 }

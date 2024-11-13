@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import sprint3.product.Cell;
+import sprint3.product.Game.GameState;
 import sprint3.product.Game.NMMGame;
 
 import static org.junit.Assert.assertEquals;
@@ -33,7 +34,7 @@ public class TestFlyPiece {
 	// acceptance criterion 5.1
 	@Test
 	public void testFlyPieceToEmptyCell() {
-		assertEquals("", board.getCurrentGamestate(), NMMGame.GameState.FLYING);
+		assertEquals("", board.getTurnPlayer().getPlayersGamestate(), GameState.FLYING);
 		board.getTurnPlayer().movePiece(3, 0, 0, 0);
 		assertEquals("", board.getCell(3, 0), Cell.RED);
 		assertEquals("", board.getCell(0, 0), Cell.EMPTY);
@@ -44,7 +45,7 @@ public class TestFlyPiece {
 	@Test
 	public void testFlyPieceToNonEmptyCell() {
 		Cell beforeMove;
-		assertEquals("", board.getCurrentGamestate(), NMMGame.GameState.FLYING);
+		assertEquals("", board.getTurnPlayer().getPlayersGamestate(), GameState.FLYING);
 
 		beforeMove = board.getCell(1, 1);
 

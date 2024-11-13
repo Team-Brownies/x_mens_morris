@@ -9,4 +9,14 @@ public class HumanPlayer extends Player{
         super(color, pieces, game);
         setCpu(false);
     }
+
+    @Override
+    public int[] genPlace() {
+        return new int[0];
+    }
+
+    @Override
+    public void makeCPUMove() {
+
+    }
 }
