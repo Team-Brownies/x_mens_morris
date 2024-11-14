@@ -93,11 +93,6 @@ public class GamePiece {
 
             this.validMovesLocations.addAll(validMoves);
         }
-        if (!validMovesLocations.isEmpty() && id.contains("R")) {
-            printLocation();
-            System.out.println("valid moves: ");
-            printValidMoves();
-        }
     }
 
     // clear list of Valid Moves Locations

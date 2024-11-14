@@ -7,8 +7,7 @@ import sprint3.product.Player.CPUPlayer;
 import sprint3.product.Player.HumanPlayer;
 import sprint3.product.Player.Player;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public abstract class Game {
 	private Cell[][] grid;
@@ -23,8 +22,8 @@ public abstract class Game {
 		this.size = size;
 		this.grid = new Cell[this.size][this.size];
 		setValid();
-		this.redPlayer = new HumanPlayer('R',pieces, this);
-		this.bluePlayer = new CPUPlayer('B',pieces, this);
+		this.redPlayer = new CPUPlayer('R',pieces, this);
+		this.bluePlayer = new HumanPlayer('B',pieces, this);
 		this.turnPlayer = this.redPlayer;
 		this.opponentPlayer = this.bluePlayer;
 	}
@@ -39,7 +38,7 @@ public abstract class Game {
 					this.grid[row][col] = Cell.EMPTY;
 				else
 					this.grid[row][col] = Cell.INVALID;
-				//Makes middle cell invalid
+				//Makes middle cell null
 				if (row == middle && col == middle)
 					this.grid[row][col] = null;
 			}
@@ -173,7 +172,6 @@ public abstract class Game {
 
 	// method to allow the CPU players to make there moves
 	public void letCPUMove(){
-		System.out.println("CPU: "+this.turnPlayer.isCPU());
 		if(this.turnPlayer.isCPU()){
 			this.turnPlayer.makeCPUMove();
 		}

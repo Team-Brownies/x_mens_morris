@@ -16,7 +16,6 @@ import sprint3.product.GamePiece;
 import sprint3.product.Player.Player;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 public class GameSpace extends Pane {
@@ -170,8 +169,6 @@ public class GameSpace extends Pane {
         Player turnPlayer = game.getTurnPlayer();
         GameState gameState = turnPlayer.getPlayersGamestate();
         if(!turnPlayer.isCPU()) {
-            System.out.println(Arrays.toString(new int[]{this.row, this.col}));
-            System.out.println(game.getCell(this.row,this.col));
             switch (gameState) {
                 case PLACING:
                     if(game.canPlacePiece(this.row, this.col))
@@ -201,7 +198,6 @@ public class GameSpace extends Pane {
             this.gamePiece.setStroke(Color.GREEN);
             if (turnPlayer.getPlayersGamestate() == GameState.MOVING )
                 piece.updateValidMovesLocations();
-//            piece.printValidMoves();
             board.highlightCells();
         } else if (game.getCell(this.row, this.col) == game.movingOrFlying() && movingGP != null) {
             turnPlayer.movePiece(this.row, this.col, movingGP.row, movingGP.col);

@@ -95,7 +95,6 @@ public class Board extends Application {
 
 	// give the game spaces adjacent to the selected game piece for player to see where the piece can be moved to
 	public void highlightCells(){
-		System.out.println("highlightCells");
 		Player turnPlayer = game.getTurnPlayer();
 		GameState gameState = turnPlayer.getPlayersGamestate();
 		clearHighlights();

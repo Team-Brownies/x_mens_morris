@@ -1,15 +1,14 @@
 package sprint3.product;
 
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class CheckMill {
     private final Cell[][] grid;
+    private final int middle;
     public CheckMill(Cell[][] grid) {
         this.grid = grid;
+        this.middle = (grid[0].length-1)/2;
 
     }
     public Set<int[]> getMillMates(int row, int col){
@@ -21,7 +20,6 @@ public class CheckMill {
             for (int[] dir : directions) {
                 millMates.addAll(searchForMillMates(dir[0], dir[1], coords));
             }
-            System.out.println(millMates);
         } else {
             return null;
         }
@@ -35,16 +33,14 @@ public class CheckMill {
         Cell testCell;
         Set<int[]> millMates = new HashSet<>();
 
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 1; i < grid.length; i++) {
             xMagnitude = col+(i*xDirection);
             yMagnitude = row+(i*yDirection);
-            System.out.println("check: "+yMagnitude+", "+xMagnitude);
-            System.out.println("grid.length: "+(grid.length-1));
-            if(xMagnitude<grid.length && yMagnitude<grid.length){
+            if(xMagnitude<grid.length && yMagnitude<grid.length
+                    && xMagnitude>=0 && yMagnitude>=0){
                 testCell = grid[yMagnitude][xMagnitude];
                 if(testCell == color && this.checkMillAllDirections(yMagnitude,xMagnitude)) {
                     millMates.add(new int[]{yMagnitude,xMagnitude});
-                    break;
                 }
                 else if (testCell != Cell.INVALID)
                     break;
@@ -55,12 +51,12 @@ public class CheckMill {
     public boolean checkMillAllDirections(int row, int col) {
         //check for mill around the piece in all directions
         //return true if mill is formed else false
+
         return checkVerticalMillDown(row, col) ||
                 checkVerticalMillTop(row, col) ||
                 checkHorizontalMillRight(row, col) ||
                 checkHorizontalMillLeft(row, col) ||
-                checkVerticalMillMiddle(row, col) ||
-                checkHorizontalMillMiddle(row, col);
+                checkMillMiddle(row, col);
     }
     private boolean checkMillCombo(int red_piece, int blue_piece){
         if(red_piece > 0 && blue_piece > 0){ //if opponent piece was found on mill
@@ -80,14 +76,13 @@ public class CheckMill {
             }else if (grid[i][col] == Cell.INVALID || grid[i][col] == null) {
                 invalid_point++;
             }
-            if(col == 3 && invalid_point != 0){
+            if(col == middle && invalid_point != 0){
                 break;
             }
             if(red_piece > 0 && blue_piece > 0){ //if opponent piece was found on mill
                 return false;
             }
             if(red_piece == 3 || blue_piece == 3){
-                System.out.println("checkVerticalMillDown");
                 return true;
             }  // return true if the mill is formed
         }
@@ -105,14 +100,13 @@ public class CheckMill {
             }else if (grid[i][col] == Cell.INVALID || grid[i][col] == null) {
                 invalid_point++;
             }
-            if(col == 3 && invalid_point != 0){
+            if(col == middle && invalid_point != 0){
                 break;
             }
             if(red_piece > 0 && blue_piece > 0){ //if opponent piece was found on mill
                 return false;
             }
             if(red_piece == 3 || blue_piece == 3){
-                System.out.println("checkVerticalMillDown");
                 return true;
             }  // return true if the mill is formed
         }
@@ -131,14 +125,13 @@ public class CheckMill {
             }else if (grid[row][i] == Cell.INVALID || grid[row][i] == null) {
                 invalid_point++;
             }
-            if(row == 3 && invalid_point != 0){
+            if(row == middle && invalid_point != 0){
                 break;
             }
             if(red_piece > 0 && blue_piece > 0){ //if opponent piece was found on mill
                 return false;
             }
             if(red_piece == 3 || blue_piece == 3){
-                System.out.println("checkVerticalMillDown");
                 return true;
             }  // return true if the mill is formed
         }
@@ -156,49 +149,56 @@ public class CheckMill {
             }else if (grid[row][i] == Cell.INVALID || grid[row][i] == null) {
                 invalid_point++;
             }
-            if(row == 3 && invalid_point != 0){
+            if(row == middle && invalid_point != 0){
                 break;
             }
             if(red_piece > 0 && blue_piece > 0){ //if opponent piece was found on mill
                 return false;
             }
             if(red_piece == 3 || blue_piece == 3){
-                System.out.println("checkVerticalMillDown");
                 return true;
             }  // return true if the mill is formed
         }
         return false;
     }
-    private boolean checkHorizontalMillMiddle(int row, int col) {
-        boolean returnStatment = false;
-        try{
-            returnStatment = ((grid[row][col - 1] == Cell.RED && grid[row][col] == Cell.RED && grid[row][col + 1] == Cell.RED) ||
-                    (grid[row][col - 1] == Cell.BLUE && grid[row][col] == Cell.BLUE  && grid[row][col + 1] == Cell.BLUE)) ||
-                    ((grid[row][col - 2] == Cell.RED && grid[row][col] == Cell.RED && grid[row][col + 2] == Cell.RED) ||
-                            (grid[row][col - 2] == Cell.BLUE && grid[row][col] == Cell.BLUE  && grid[row][col + 2] == Cell.BLUE)) ||
-                    ((grid[row][col - 3] == Cell.RED && grid[row][col] == Cell.RED && grid[row][col + 3] == Cell.RED) ||
-                            (grid[row][col- 3] == Cell.BLUE && grid[row][col] == Cell.BLUE && grid[row][col + 3] == Cell.BLUE));
-        } catch (ArrayIndexOutOfBoundsException _) {
-        }
-        if (returnStatment)
-            System.out.println("checkHorizontalMillMiddle");
+    private boolean checkMillMiddle(int row, int col) {
+        int millHorizontalPieces = 1;
+        int millVerticalPieces = 1;
 
-        return returnStatment;
+        // searches for players piece on neighboring right cols
+        millHorizontalPieces += scanNeighbors(row, col, 0, 1);
+        // searches for players piece on neighboring left cols
+        millHorizontalPieces += scanNeighbors(row, col, 0, -1);
+
+        // searches for players piece on neighboring down rows
+        millVerticalPieces += scanNeighbors(row, col, 1, 0);
+        // searches for players piece on neighboring up rows
+        millVerticalPieces += scanNeighbors(row, col, -1, 0);
+
+        return millHorizontalPieces == 3 || millVerticalPieces == 3;
     }
-    private boolean checkVerticalMillMiddle(int row, int col) {
-        boolean returnStatment = false;
-        try{
-            returnStatment = ((grid[row - 1][col] == Cell.RED && grid[row][col] == Cell.RED && grid[row + 1][col] == Cell.RED) ||
-                    (grid[row - 1][col] == Cell.BLUE && grid[row][col] == Cell.BLUE  && grid[row + 1][col] == Cell.BLUE)) ||
-                    ((grid[row - 2][col] == Cell.RED && grid[row][col] == Cell.RED && grid[row + 2][col] == Cell.RED) ||
-                            (grid[row - 2][col] == Cell.BLUE && grid[row][col] == Cell.BLUE  && grid[row + 2][col] == Cell.BLUE)) ||
-                    ((grid[row - 3][col] == Cell.RED && grid[row][col] == Cell.RED && grid[row + 3][col] == Cell.RED) ||
-                            (grid[row - 3][col] == Cell.BLUE && grid[row][col] == Cell.BLUE && grid[row + 3][col] == Cell.BLUE));
-        } catch (ArrayIndexOutOfBoundsException _) {
-        }
-        if (returnStatment)
-            System.out.println("checkVerticalMillMiddle");
 
-        return returnStatment;
+    private int scanNeighbors(int row, int col, int xDir, int yDir) {
+        Cell searchTag = grid[row][col];
+        Cell testPiece = null;
+        int millPieces = 0;
+        for (int i = 1; i < grid[0].length; i++) {
+            // makes sure the row or col are in range
+            try{
+                testPiece = grid[row+(i*xDir)][col+(i*yDir)];
+            } catch (ArrayIndexOutOfBoundsException _) {
+                // break if row or col leaves range
+                break;
+            }
+            // see if the game piece is the one matching the players game piece
+            if(testPiece == searchTag){
+                millPieces++;
+            }
+            // breaks if an empty game space or another players game piece is found
+            else if (testPiece != Cell.INVALID) {
+                break;
+            }
+        }
+        return millPieces;
     }
 }

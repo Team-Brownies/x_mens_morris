@@ -112,7 +112,6 @@ public abstract class Player {
                 game.checkMill(row, col);
             });
         } else {
-            System.out.println("place check mill");
             game.checkMill(row, col);
         }
     }
