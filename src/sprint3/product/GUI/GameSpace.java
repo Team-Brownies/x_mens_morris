@@ -135,6 +135,11 @@ public class GameSpace extends Pane {
         return point;
     }
 
+    // return game piece that is on this game space
+    public Circle getGamePiece() {
+        return gamePiece;
+    }
+
     // return game space's row
     public int getRow() {
         return row;

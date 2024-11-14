@@ -14,7 +14,7 @@ public class CPUPlayer extends Player{
     }
     private Game game;
     private int gridSize;
-    private Difficulty difficulty = Difficulty.NORMAL;
+    private Difficulty difficulty;
 
     // changes player so a cpu can control
     public CPUPlayer(char color, int pieces, Game game) {

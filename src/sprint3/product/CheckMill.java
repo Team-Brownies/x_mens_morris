@@ -11,6 +11,37 @@ public class CheckMill {
         this.middle = (grid[0].length-1)/2;
 
     }
+
+    // finds if mill is in a shared row or col (returns 0 for row, 1 for col)
+    public int findCommonIndex(List<int[]> sortedMillMates){
+        int inCommonIndex = 0;
+        int inCommon = sortedMillMates.getFirst()[inCommonIndex];
+
+        for (int[] p: sortedMillMates){
+            if (!(inCommon==p[inCommonIndex])){
+                inCommonIndex = 1;
+                inCommon = sortedMillMates.getFirst()[inCommonIndex];
+            }
+        }
+        return inCommonIndex;
+
+    }
+
+    // sorts mill mates by the non-shared position
+    public List<int[]> sortMillMatesBySharedPosition(Set<int[]> millMates){
+        List<int[]> sortedMillMates = new ArrayList<>(millMates);
+        int inCommonIndex = findCommonIndex(sortedMillMates);
+
+        int nonCommonIndex = (inCommonIndex==0) ? 1:0;
+        System.out.println(nonCommonIndex);
+        sortedMillMates.sort(Comparator.comparingInt(arr -> arr[nonCommonIndex]));
+        System.out.println("Sorted MILL");
+        sortedMillMates.forEach(o -> System.out.println(Arrays.toString(o)));
+
+        return sortedMillMates;
+    }
+
+    // return a set of pieces a mill is in with
     public Set<int[]> getMillMates(int row, int col){
         Set<int[]> millMates = new HashSet<>();
         int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
@@ -25,6 +56,7 @@ public class CheckMill {
         }
         return millMates;
     }
+    // searches for pieces a mill is in with
     private Set<int[]> searchForMillMates(int xDirection, int yDirection, int[] coords){
         int xMagnitude, yMagnitude;
         int row = coords[0];

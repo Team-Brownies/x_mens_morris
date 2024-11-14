@@ -1,18 +1,24 @@
 package sprint3.product.GUI;
+import javafx.animation.*;
 import javafx.application.Application;
+import javafx.geometry.Point3D;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import sprint3.product.Cell;
+import sprint3.product.CheckMill;
 import sprint3.product.Game.Game;
 import sprint3.product.Game.GameState;
 import sprint3.product.Game.NineMMGame;
 import sprint3.product.GamePiece;
 import sprint3.product.Player.Player;
 
-import java.util.List;
+import java.util.*;
 
 
 public class Board extends Application {
@@ -132,6 +138,66 @@ public class Board extends Application {
 			for (int col = 0; col < this.getGameSize(); col++)
 				if (game.getCell(row, col) == game.movingOrFlying() && movingGP != null)
 					this.getGameSpace(row, col).getPoint().setStroke(Color.GREEN);
+	}
+	// run animation each piece in the mill
+	private void animateEachMillPiece(Runnable onFinished, Point3D axis, List<int[]> sortedMillMates){
+		Circle animateGP;
+		SequentialTransition finalTransition = new SequentialTransition();
+		for (int[] coords:sortedMillMates) {
+			animateGP = this.getGameSpace(coords[0],coords[1]).getGamePiece();
+			// Create a fall (scale) transition a gamePiece shrinking as it falls
+			ScaleTransition growTransition = new ScaleTransition(Duration.millis(250), animateGP);
+			growTransition.setFromY(1.0);
+			growTransition.setFromX(1.0);
+			growTransition.setToY(2.0);
+			growTransition.setToX(2.0);
+			growTransition.setInterpolator(Interpolator.EASE_OUT);
+
+			ScaleTransition shrinkTransition = new ScaleTransition(Duration.millis(250), animateGP);
+			shrinkTransition.setFromY(2.0);
+			shrinkTransition.setFromX(2.0);
+			shrinkTransition.setToY(1.0);
+			shrinkTransition.setToX(1.0);
+			shrinkTransition.setInterpolator(Interpolator.EASE_IN);
+
+			// Create a flipping transition
+			RotateTransition flipTransition = new RotateTransition(Duration.millis(500), animateGP);
+			// Rotate around the X-axis or Y-axis
+			flipTransition.setAxis(axis);
+			flipTransition.setFromAngle(0);
+			flipTransition.setToAngle(360);  // Full rotation for a coin flip effect
+			flipTransition.setInterpolator(Interpolator.EASE_BOTH);
+
+			// Add pause and parallel transitions into a sequential transition to start with a pause
+			SequentialTransition scaleTransition = new SequentialTransition(growTransition, shrinkTransition);
+
+			// Combine both the movement, fall and flip sequence into a parallel transition
+			ParallelTransition parallelTransition = new ParallelTransition(scaleTransition, flipTransition);
+
+			finalTransition.getChildren().add(parallelTransition);
+
+
+		}
+		finalTransition.play();
+
+		finalTransition.setOnFinished(_ -> {
+			if (onFinished != null) {
+				onFinished.run();
+			}
+		});
+	}
+	// run animation for when a mill is formed
+	public void animateMillForm(Runnable onFinished, List<int[]> millMates) {
+		CheckMill millChecker = new CheckMill(game.getGrid());
+
+		int inCommonIndex = millChecker.findCommonIndex(millMates);
+		Point3D axis = (inCommonIndex==0) ? Rotate.Y_AXIS:Rotate.X_AXIS;
+
+		animateEachMillPiece(() -> {
+			if (onFinished != null) {
+				onFinished.run();
+			}
+		},axis, millMates);
 	}
 
 	// return the game the gui is using

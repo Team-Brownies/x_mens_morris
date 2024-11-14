@@ -23,7 +23,7 @@ public abstract class Game {
 		this.grid = new Cell[this.size][this.size];
 		setValid();
 		this.redPlayer = new CPUPlayer('R',pieces, this);
-		this.bluePlayer = new HumanPlayer('B',pieces, this);
+		this.bluePlayer = new CPUPlayer('B',pieces, this);
 		this.turnPlayer = this.redPlayer;
 		this.opponentPlayer = this.bluePlayer;
 	}
@@ -237,9 +237,20 @@ public abstract class Game {
 	// check to see if a mill was formed before changing turns
 	public void checkMill(int row, int col) {
 		CheckMill millChecker = new CheckMill(this.getGrid());
+		Set<int[]> millMates = new HashSet<>();
+		List<int[]> sortedMillMates;
 		if(millChecker.checkMillAllDirections(row, col)){
-			this.turnPlayer.setPlayersGamestate(GameState.MILLING);
-			this.letCPUMove();
+			millMates.add(new int[]{row,col});
+			millMates.addAll(millChecker.getMillMates(row, col));
+			sortedMillMates = millChecker.sortMillMatesBySharedPosition(millMates);
+
+			gui.animateMillForm(() -> {
+				// don't change the turn if the player has formed the mill
+				// switch to mill state after animation plays
+				this.turnPlayer.setPlayersGamestate(GameState.MILLING);
+				gui.updateGameStatus();
+				this.letCPUMove();
+			},sortedMillMates);
 		}
 		else{
 			this.changeTurn();
