@@ -141,10 +141,14 @@ public class Board extends Application {
 	}
 	// run animation each piece in the mill
 	private void animateEachMillPiece(Runnable onFinished, Point3D axis, List<int[]> sortedMillMates){
+		GameSpace gameSpace;
 		Circle animateGP;
 		SequentialTransition finalTransition = new SequentialTransition();
 		for (int[] coords:sortedMillMates) {
-			animateGP = this.getGameSpace(coords[0],coords[1]).getGamePiece();
+			gameSpace = this.getGameSpace(coords[0],coords[1]);
+			animateGP = gameSpace.getGamePiece();
+			gameSpace.toFront();
+			animateGP.toFront();
 			// Create a fall (scale) transition a gamePiece shrinking as it falls
 			ScaleTransition growTransition = new ScaleTransition(Duration.millis(250), animateGP);
 			growTransition.setFromY(1.0);
