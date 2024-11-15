@@ -1,6 +1,7 @@
 package sprint3.product.GUI;
 
 import javafx.animation.*;
+import javafx.geometry.Bounds;
 import javafx.geometry.Point3D;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
@@ -15,7 +16,6 @@ import sprint3.product.Game.GameState;
 import sprint3.product.GamePiece;
 import sprint3.product.Player.Player;
 
-import java.util.Arrays;
 import java.util.Random;
 
 public class GameSpace extends Pane {
@@ -210,6 +210,44 @@ public class GameSpace extends Pane {
         }
     }
 
+    private ParallelTransition animateQueuePlace(Circle animateGP) {
+        PlayerPanel turnPanel = board.getTurnPlayerPanel();
+        Circle panelGamePiece = turnPanel.getGamePieceFromQueue();
+
+        animateGP.setLayoutY(-200);
+        Bounds animateStartBounds = this.localToScene(animateGP.getBoundsInLocal());
+        Bounds queuePieceBounds = panelGamePiece.localToScene(panelGamePiece.getBoundsInLocal());
+
+        System.out.println("a: "+animateStartBounds.getWidth());
+        System.out.println("q: "+animateStartBounds.getHeight());
+
+        // Translate `panelGamePiece` to match the animateGP start position
+        TranslateTransition queueMoveTransition = new TranslateTransition(Duration.millis(500), panelGamePiece);
+        queueMoveTransition.setFromX(0);
+        queueMoveTransition.setFromY(0);
+        queueMoveTransition.setToX(animateStartBounds.getMinX() - queuePieceBounds.getMinX());
+        queueMoveTransition.setToY(animateStartBounds.getMinY() - queuePieceBounds.getMinY()-200);
+        queueMoveTransition.setInterpolator(Interpolator.EASE_BOTH);
+
+        // grows the panelGamePiece to match animateGP
+        ScaleTransition queueGrowTransition = new ScaleTransition(Duration.millis(500), panelGamePiece);
+        queueGrowTransition.setFromY(1.0);
+        queueGrowTransition.setFromX(1.0);
+        queueGrowTransition.setToY(2.0);
+        queueGrowTransition.setToX(2.0);
+        queueGrowTransition.setInterpolator(Interpolator.EASE_OUT);
+
+        // Combine both the movement, fall and flip sequence into a parallel transition
+        ParallelTransition queueParallelTransition = new ParallelTransition(queueMoveTransition, queueGrowTransition);
+
+
+        queueParallelTransition.setOnFinished(_ -> {
+            panelGamePiece.setVisible(false);
+            turnPanel.removeFromQueue();
+        });
+        return queueParallelTransition;
+    }
+
     // run animation for placing a piece
     public void animatePlacePiece(Runnable onFinished) {
         Color color = (game.getTurnPlayer().getColor()=='R') ? board.getRed() : board.getBlue();
@@ -220,12 +258,16 @@ public class GameSpace extends Pane {
         this.gamePiece.setVisible(false);
 
         PauseTransition pauseTransition = new PauseTransition(Duration.millis(0));
-        pauseTransition.setOnFinished(_ -> animateGP.setVisible(true));
+        pauseTransition.setOnFinished(_ -> {
+            animateGP.setVisible(true);
+        });
+
+        ParallelTransition queueParallelTransition = animateQueuePlace(animateGP);
 
         // Create a moving transition to simulate a gamePiece falling down
         TranslateTransition moveTransition = new TranslateTransition(Duration.millis(500), animateGP);
-        moveTransition.setFromY(-200);
-        moveTransition.setToY(0);
+        moveTransition.setFromY(0);
+        moveTransition.setToY(200);
         moveTransition.setInterpolator(javafx.animation.Interpolator.EASE_IN);
 
         // Create a fall (scale) transition a gamePiece shrinking as it falls
@@ -248,7 +290,7 @@ public class GameSpace extends Pane {
         ParallelTransition parallelTransition = new ParallelTransition(moveTransition, fallTransition, flipTransition);
 
         // Add pause and parallel transitions into a sequential transition to start with a pause
-        SequentialTransition finalTransition = new SequentialTransition(pauseTransition, parallelTransition);
+        SequentialTransition finalTransition = new SequentialTransition(queueParallelTransition, pauseTransition, parallelTransition);
 
         finalTransition.play();
 
@@ -304,37 +346,38 @@ public class GameSpace extends Pane {
 
     // run animation for removing a piece
     public void animateRemovePiece(Runnable onFinished) {
-        Color color = (game.getOpponentPlayer().getColor()=='R') ? board.getRed() : board.getBlue();
-        Circle animateGP = drawAnimationGamePiece(this,color);
-        int randomNumber;
+        PlayerPanel turnPanel = board.getTurnPlayerPanel();
+        Circle captureGP = turnPanel.addToCaptureSpace();
+        Color borderColor = (Color) captureGP.getStroke();
+
+        Bounds gpStartBounds = this.localToScene(this.gamePiece.getBoundsInLocal());
+        Bounds capturePieceBounds = captureGP.localToScene(captureGP.getBoundsInLocal());
 
         PauseTransition pauseTransition = new PauseTransition(Duration.millis(0));
         pauseTransition.setOnFinished(_ ->{
-            animateGP.setVisible(true);
-            updateCell();
+            this.gamePiece.setVisible(false);
+            captureGP.setStroke(Color.TRANSPARENT);
         });
 
-        TranslateTransition flingTransition = new TranslateTransition(Duration.millis(500), animateGP);
+        // Translate `panelGamePiece` to match the animateGP start position
+        TranslateTransition captureMoveTransition = new TranslateTransition(Duration.millis(500), captureGP);
+        captureMoveTransition.setFromX(gpStartBounds.getMinX() - capturePieceBounds.getMinX());
+        captureMoveTransition.setFromY(gpStartBounds.getMinY() - capturePieceBounds.getMinY());
+        captureMoveTransition.setToX(0);
+        captureMoveTransition.setToY(0);
+        captureMoveTransition.setInterpolator(Interpolator.EASE_OUT);
 
-        randomNumber = getRandom(1000, 200, true);
-        flingTransition.setToX(randomNumber);
-        randomNumber = getRandom(1000, -200, true);
-        flingTransition.setToY(randomNumber);
-
-        flingTransition.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
-
-        SequentialTransition sequentialTransition = new SequentialTransition(pauseTransition, flingTransition);
+        SequentialTransition sequentialTransition = new SequentialTransition(pauseTransition, captureMoveTransition);
         sequentialTransition.play();
 
-        flingTransition.setOnFinished(_ -> {
+        sequentialTransition.setOnFinished(_ -> {
             if (onFinished != null) {
                 onFinished.run();
             }
-            //updateMill();
+            this.gamePiece.setVisible(true);
+            captureGP.setStroke(borderColor);
             board.updateGameStatus();
-            getChildren().remove(animateGP);
         });
-
     }
 
     // update the game piece on this game space

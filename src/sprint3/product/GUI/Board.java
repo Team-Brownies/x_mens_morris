@@ -1,4 +1,5 @@
 package sprint3.product.GUI;
+
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.geometry.Point3D;
@@ -20,12 +21,16 @@ import sprint3.product.Player.Player;
 
 import java.util.*;
 
-
 public class Board extends Application {
+	private final double sceneSize = 450;
 	private GameSpace[][] gameSpaces;
+	private PlayerPanel redPanel;
+	private PlayerPanel bluePanel;
 	private Label gameStatus = new Label("RED's Turn");
 	private Game game;
 	private int gameSize = 0;
+	private PlayerPanel turnPlayerPanel;
+	private PlayerPanel oppPlayerPanel;
 
 	private Color red = Color.RED;
 	private Color blue = Color.BLUE;
@@ -34,6 +39,7 @@ public class Board extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
+		double playerPaneSize = sceneSize/3;
 		if (game == null) {
 			game = new NineMMGame();
 		}
@@ -42,6 +48,11 @@ public class Board extends Application {
 		gameSize = game.getSize();
 		GridPane pane = new GridPane();
 		gameSpaces = new GameSpace[gameSize][gameSize];
+		redPanel = new PlayerPanel(playerPaneSize, red, blue, game.getRedPlayer());
+		bluePanel = new PlayerPanel(playerPaneSize, blue, red, game.getBluePlayer());
+
+		turnPlayerPanel = redPanel;
+		oppPlayerPanel = bluePanel;
 
 		// added gameSpace objects to the game grid
 		// set empty cell is valid and invalid is not valid
@@ -52,11 +63,18 @@ public class Board extends Application {
 				}else {
 					pane.add(gameSpaces[row][col] = new GameSpace(row, col, false, this), col, row);
 				}
-		BorderPane borderPane = new BorderPane();
-		borderPane.setCenter(pane);
-		borderPane.setBottom(gameStatus);
 
-		Scene scene = new Scene(borderPane, 450, 450);
+
+		BorderPane borderPane = new BorderPane();
+		BorderPane boardPane = new BorderPane();
+		borderPane.setCenter(boardPane);
+		boardPane.setCenter(pane);
+		boardPane.setBottom(gameStatus);
+
+		borderPane.setLeft(redPanel);
+		borderPane.setRight(bluePanel);
+
+		Scene scene = new Scene(borderPane, sceneSize+(playerPaneSize*2), sceneSize);
 		primaryStage.setTitle("Nine Men's Morris");
 		primaryStage.setScene(scene);
 		primaryStage.show();
@@ -223,6 +241,20 @@ public class Board extends Application {
 	public Color getBlue() {
 		return blue;
 	}
+
+	public PlayerPanel getTurnPlayerPanel() {
+		return turnPlayerPanel;
+	}
+
+	public PlayerPanel getOppPlayerPanel() {
+		return oppPlayerPanel;
+	}
+
+	public void changeTurnPlayerPanel() {
+		this.turnPlayerPanel = (this.turnPlayerPanel.getPlayerColor() == red) ? this.bluePanel : this.redPanel;
+	}
+
+
 
 	public static void main(String[] args) {
 		launch(args);

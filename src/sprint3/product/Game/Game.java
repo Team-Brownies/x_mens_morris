@@ -23,7 +23,7 @@ public abstract class Game {
 		this.grid = new Cell[this.size][this.size];
 		setValid();
 		this.redPlayer = new CPUPlayer('R',pieces, this);
-		this.bluePlayer = new CPUPlayer('B',pieces, this);
+		this.bluePlayer = new HumanPlayer('B',pieces, this);
 		this.turnPlayer = this.redPlayer;
 		this.opponentPlayer = this.bluePlayer;
 	}
@@ -164,6 +164,7 @@ public abstract class Game {
 		this.turnPlayer = (this.turnPlayer.getColor() == 'R') ? this.bluePlayer : this.redPlayer;
 		this.opponentPlayer = (this.opponentPlayer.getColor() == 'B') ? this.redPlayer : this.bluePlayer;
 
+		gui.changeTurnPlayerPanel();
 
 		this.updateGameState();
 		this.gameOver();
