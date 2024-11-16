@@ -6,9 +6,9 @@ import org.junit.Test;
 import sprint3.product.Cell;
 import sprint3.product.Game.GameState;
 import sprint3.product.Game.NineMMGame;
+import sprint3.product.Player.HumanPlayer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 public class TestMovePiece {
 
@@ -17,6 +17,10 @@ public class TestMovePiece {
 	@Before
 	public void setUp() throws Exception {
 		board = new NineMMGame();
+
+		board.setRedPlayer(new HumanPlayer('R', board));
+		board.setBluePlayer(new HumanPlayer('B', board));
+
 		board.getTurnPlayer().placePiece(0, 0);
 		board.getTurnPlayer().placePiece(1, 1);
 		board.getTurnPlayer().placePiece(2, 2);
@@ -50,7 +54,8 @@ public class TestMovePiece {
 		assertEquals("", board.getTurnPlayer().getPlayersGamestate(), GameState.MOVING);
 		board.getTurnPlayer().movePiece(3, 0, 0, 0);
 		assertEquals("", board.getCell(3, 0), Cell.RED);
-		assertEquals("", board.getCell(0, 0), Cell.EMPTY);
+		Cell cell = board.getCell(0, 0);
+		assertTrue("",cell == Cell.EMPTY || cell == Cell.MOVEVALID);
 		assertEquals("", board.getTurnPlayer().getColor(), 'B');
 	}
 

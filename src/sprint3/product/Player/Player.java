@@ -25,12 +25,12 @@ public abstract class Player {
     private GameState playersGamestate;
 
     // player one for each user
-    public Player(char color, int pieces, Game game) {
+    public Player(char color, Game game) {
         this.color = color;
         this.game = game;
 
         // assigns game pieces to player
-        for (int i = pieces; i >= 1; i--) {
+        for (int i = game.getPieces(); i >= 1; i--) {
             this.gamePieces.push(new GamePiece(i, color, game));
         }
         // assign tags for players based on color
@@ -103,16 +103,18 @@ public abstract class Player {
     // places a game piece on the given coordinates
     public void placePiece(int row, int col) {
         Board gui = game.getGui();
-        GameSpace animateGP = gui.getGameSpace(row, col);
-        game.setGrid(row, col, this.playerTag);
-        this.setGamePieceStartingLocation(row, col);
-        if (this.playersGamestate==GameState.PLACING) {
-            animateGP.animatePlacePiece(() -> {
-                //don't change the turn if the player has formed the mill
+        if(game.canPlacePiece(row,col)) {
+            game.setGrid(row, col, this.playerTag);
+            this.setGamePieceStartingLocation(row, col);
+            if (this.playersGamestate==GameState.PLACING && gui!=null) {
+                GameSpace animateGP = gui.getGameSpace(row, col);
+                animateGP.animatePlacePiece(() -> {
+                    //don't change the turn if the player has formed the mill
+                    game.checkMill(row, col);
+                });
+            } else {
                 game.checkMill(row, col);
-            });
-        } else {
-            game.checkMill(row, col);
+            }
         }
     }
 
@@ -120,27 +122,35 @@ public abstract class Player {
     public void movePiece(int row, int col, int movingRow, int movingCol) {
         GamePiece gp = this.getGamePieceByLocation(movingRow, movingCol);
         Board gui = game.getGui();
-        GameSpace animateGP = gui.getGameSpace(row, col);
-        GameSpace movingGP = gui.getGameSpace(movingRow, movingCol);
 
-        //clear old game space
-        game.setGrid(movingRow, movingCol, Cell.EMPTY);
+        if(game.canPlacePiece(row,col)) {
+            //clear old game space
+            game.setGrid(movingRow, movingCol, Cell.EMPTY);
 
-        animateGP.animateMovePiece(() -> {
-            //place on new game space
-            placePiece(row,col);
-//            game.clearHighlightCells();
-            assert gp != null;
-            //update pieces Location
-            gp.setLocation(row,col);
-        },movingGP);
+            if (gui != null) {
+                GameSpace animateGP = gui.getGameSpace(row, col);
+                GameSpace movingGP = gui.getGameSpace(movingRow, movingCol);
+                animateGP.animateMovePiece(() -> {
+                    //place on new game space
+                    placePiece(row, col);
+                    assert gp != null;
+                    //update pieces Location
+                    gp.setLocation(row, col);
+                }, movingGP);
+            } else {
+                //place on new game space
+                placePiece(row, col);
+                assert gp != null;
+                //update pieces Location
+                gp.setLocation(row, col);
+            }
+        }
     }
 
     // remove a players game piece from game
     public boolean removePiece(int row, int col) {
         CheckMill millChecker = new CheckMill(game.getGrid());
         Board gui = game.getGui();
-        GameSpace animateGP = gui.getGameSpace(row, col);
         //only lets player from removing their opponent piece
         if(game.getCell(row, col) != opponentTag){
             return false;
@@ -154,9 +164,14 @@ public abstract class Player {
                 game.setGrid(row, col, Cell.EMPTY);
                 //removes the player's piece from the pieces list
                 game.getOpponentPlayer().removeBoardPiece(row, col);
-                animateGP.animateRemovePiece(() -> {
+                if (gui!=null) {
+                    GameSpace animateGP = gui.getGameSpace(row, col);
+                    animateGP.animateRemovePiece(() -> {
+                        game.changeTurn();
+                    });
+                } else {
                     game.changeTurn();
-                });
+                }
                 return true; //player can remove the opp player piece nit in the mill
             }
         }
@@ -190,8 +205,8 @@ public abstract class Player {
     }
 
     // sets the player to CPU
-    protected void setToCpu() {
-        this.cpu = true;
+    public void setCpu(boolean isCpu) {
+        this.cpu = isCpu;
     }
 
     // return the game this player is in

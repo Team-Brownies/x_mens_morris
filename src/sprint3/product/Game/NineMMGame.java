@@ -4,11 +4,11 @@ import sprint3.product.Player.Player;
 
 public class NineMMGame extends Game {
 
-	private static final int PIECES = 9;
-	private static final int SIZE = 7;
+	private static final int pieces = 9;
+	private static final int size = 7;
 
 	public NineMMGame() {
-		super(PIECES, SIZE);
+		super(pieces, size);
 	}
 
 	@Override

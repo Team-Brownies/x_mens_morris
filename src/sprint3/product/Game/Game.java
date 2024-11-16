@@ -10,6 +10,7 @@ import sprint3.product.Player.Player;
 import java.util.*;
 
 public abstract class Game {
+	private int pieces;
 	private Cell[][] grid;
 	private final int size;
 	private Player redPlayer;
@@ -20,12 +21,23 @@ public abstract class Game {
 
 	public Game(int pieces, int size) {
 		this.size = size;
+		this.pieces = pieces;
 		this.grid = new Cell[this.size][this.size];
 		setValid();
-		this.redPlayer = new CPUPlayer('R',pieces, this);
-		this.bluePlayer = new HumanPlayer('B',pieces, this);
+	}
+
+	public void setRedPlayer(Player redPlayer) {
+		this.redPlayer = redPlayer;
 		this.turnPlayer = this.redPlayer;
+	}
+
+	public void setBluePlayer(Player bluePlayer) {
+		this.bluePlayer = bluePlayer;
 		this.opponentPlayer = this.bluePlayer;
+	}
+
+	public int getPieces() {
+		return pieces;
 	}
 
 	// Mark gameSpaces as INVALID and EMPTY based on there position
@@ -164,7 +176,8 @@ public abstract class Game {
 		this.turnPlayer = (this.turnPlayer.getColor() == 'R') ? this.bluePlayer : this.redPlayer;
 		this.opponentPlayer = (this.opponentPlayer.getColor() == 'B') ? this.redPlayer : this.bluePlayer;
 
-		gui.changeTurnPlayerPanel();
+		if (gui!=null)
+			gui.changeTurnPlayerPanel();
 
 		this.updateGameState();
 		this.gameOver();
@@ -245,13 +258,18 @@ public abstract class Game {
 			millMates.addAll(millChecker.getMillMates(row, col));
 			sortedMillMates = millChecker.sortMillMatesBySharedPosition(millMates);
 
-			gui.animateMillForm(() -> {
-				// don't change the turn if the player has formed the mill
-				// switch to mill state after animation plays
+			if (gui!=null) {
+				gui.animateMillForm(() -> {
+					// don't change the turn if the player has formed the mill
+					// switch to mill state after animation plays
+					this.turnPlayer.setPlayersGamestate(GameState.MILLING);
+					gui.updateGameStatus();
+					this.letCPUMove();
+				}, sortedMillMates);
+			} else {
 				this.turnPlayer.setPlayersGamestate(GameState.MILLING);
-				gui.updateGameStatus();
 				this.letCPUMove();
-			},sortedMillMates);
+			}
 		}
 		else{
 			this.changeTurn();

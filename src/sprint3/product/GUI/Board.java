@@ -17,6 +17,8 @@ import sprint3.product.Game.Game;
 import sprint3.product.Game.GameState;
 import sprint3.product.Game.NineMMGame;
 import sprint3.product.GamePiece;
+import sprint3.product.Player.CPUPlayer;
+import sprint3.product.Player.HumanPlayer;
 import sprint3.product.Player.Player;
 
 import java.util.*;
@@ -42,6 +44,10 @@ public class Board extends Application {
 		double playerPaneSize = sceneSize/3;
 		if (game == null) {
 			game = new NineMMGame();
+			game.setRedPlayer(new HumanPlayer('R', game));
+			game.setBluePlayer(new HumanPlayer('B', game));
+//		this.redPlayer = ;
+//		this.bluePlayer = new HumanPlayer('B',pieces, this);
 		}
 		game.setGui(this);
 		updateGameStatus();

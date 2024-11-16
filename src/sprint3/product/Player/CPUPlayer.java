@@ -17,11 +17,19 @@ public class CPUPlayer extends Player{
     private Difficulty difficulty;
 
     // changes player so a cpu can control
-    public CPUPlayer(char color, int pieces, Game game) {
-        super(color, pieces, game);
-        setToCpu();
+    public CPUPlayer(char color, Game game) {
+        super(color, game);
+        setCpu(true);
         this.game = this.getGame();
         this.gridSize = this.game.getSize();
+        setDifficulty(3);
+    }
+
+    public CPUPlayer(char color, Game game, boolean startDisable) {
+        this(color, game);
+        // starts as disabled to set up board
+        setCpu(false);
+        // starts at hardest difficulty
         setDifficulty(3);
     }
 
@@ -202,7 +210,8 @@ public class CPUPlayer extends Player{
     // return a mill mate of a mill the Opponent could make there next turn (during moving phase)
     private int[] getRemovePieceForMoving(){
         int[][] possibleMillMove = findMillOrBlock(this.game.getOpponentPlayer(), "Mill");
-
+        System.out.println("removePiece");
+        System.out.println(Arrays.toString(getMillMatesForRemove(possibleMillMove)));
         return getMillMatesForRemove(possibleMillMove);
     }
     // handle to convect to 2d array

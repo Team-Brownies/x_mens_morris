@@ -4,11 +4,11 @@ import sprint3.product.Player.Player;
 
 public class SixMMGame extends Game {
 
-	private static final int PIECES = 6;
-	private static final int SIZE = 5;
+	private static final int pieces = 6;
+	private static final int size = 5;
 
 	public SixMMGame() {
-		super(PIECES, SIZE);
+		super(pieces, size);
 	}
 
 	// Flying is not used in Six Man's Morris
