@@ -12,11 +12,10 @@ public class SixMMGame extends Game {
 	}
 
 	// Flying is not used in Six Man's Morris
-	public void updateGameState(){
-		Player turnPlayer = this.getTurnPlayer();
-		if (turnPlayer.numberOfGamePieces() == 0 )
-			turnPlayer.setPlayersGamestate(GameState.MOVING);
-		if (turnPlayer.numberOfGamePieces() != 0)
-			turnPlayer.setPlayersGamestate(GameState.PLACING);
+	public void updateGameStatePerPlayer(Player player){
+		if (player.numberOfGamePieces() == 0 )
+			player.setPlayersGamestate(GameState.MOVING);
+		if (player.numberOfGamePieces() != 0)
+			player.setPlayersGamestate(GameState.PLACING);
 	}
 }

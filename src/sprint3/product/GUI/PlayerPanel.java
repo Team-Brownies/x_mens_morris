@@ -1,7 +1,8 @@
 package sprint3.product.GUI;
 
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.SVGPath;
@@ -16,9 +17,13 @@ public class PlayerPanel extends Pane {
     private final double gamePieceSize;
     private GridPane pieceQueue = new GridPane();
     private Pane captureSpace = new Pane();
+    private Label gameStatus = new Label("");
     private Color playerColor;
     private Color oppColor;
     private Player player;
+    private boolean isCPU;
+    private String playerType;
+    private DropShadow turnGlow;
 
 
     public PlayerPanel(double playerPaneSize, Color playerColor, Color oppColor, Player player) {
@@ -29,38 +34,104 @@ public class PlayerPanel extends Pane {
         this.player = player;
         this.iconSize = this.width / 3;
         this.gamePieceSize = this.width/10;
+        this.isCPU = player.isCPU();
 
-        addIcon(player.isCPU());
+        addIcon();
+        playerStatus();
         drawPieceQueue();
         drawCaptureSpace();
+        addGlow();
 
-        this.setStyle("-fx-background-color: lightgrey;");
+//        this.setStyle("-fx-background-color: lightgrey;");
 
         this.setPrefSize(this.width, this.height);
     }
 
-    private void addIcon(boolean isCPU) {
+    private void addGlow(){
+        Pane glowPane = new Pane();
+        glowPane.setStyle("-fx-background-color: lightgrey;");
+        glowPane.setPrefSize(this.width, this.height);
+
+        glowPane.setLayoutX(0);
+
+        glowPane.setLayoutY(0);
+
+        getChildren().add(glowPane);
+        glowPane.toBack();
+
+        turnGlow = new DropShadow();
+        turnGlow.setColor(playerColor.brighter());
+        turnGlow.setRadius(30);
+        turnGlow.setSpread(0.5);
+        turnGlow.setOffsetX(0);
+        turnGlow.setOffsetY(0);
+
+        // Apply the glow turnGlow pane
+        glowPane.setEffect(turnGlow);
+    }
+    public void setGlowVisible(boolean isVisible){
+        if (isVisible)
+            turnGlow.setColor(playerColor.brighter());
+        else
+            turnGlow.setColor(Color.TRANSPARENT);
+    }
+
+    private void addIcon() {
         SVGPath icon = new SVGPath();
-        if (isCPU)
+        if (this.isCPU)
             icon.setContent("M1.5 0A1.5 1.5 0 0 0 0 1.5v7A1.5 1.5 0 0 0 1.5 10H6v1H1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-5v-1h4.5A1.5 1.5 0 0 0 16 8.5v-7A1.5 1.5 0 0 0 14.5 0zm0 1h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-7a.5.5 0 0 1 .5-.5M12 12.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2 0a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M1.5 12h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1M1 14.25a.25.25 0 0 1 .25-.25h5.5a.25.25 0 1 1 0 .5h-5.5a.25.25 0 0 1-.25-.25");
         else
             icon.setContent("M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6");
 
-        double iconStartingSize = icon.getBoundsInLocal().getHeight();
-        icon.setScaleX(this.iconSize / iconStartingSize); // Assuming the original icon is 24x24
-        icon.setScaleY(this.iconSize / iconStartingSize); // Assuming the original icon is 24x24
+        double iconStartingSize = icon.getBoundsInLocal().getWidth();
+        icon.setScaleX(this.iconSize / iconStartingSize);
+        icon.setScaleY(this.iconSize / iconStartingSize);
 
         // Set the icon's fill color
         icon.setFill(playerColor);
-        System.out.println();
 
         // Position the icon at the top center
-        icon.setLayoutX((this.width - iconStartingSize) / 2); // Center horizontally
-        icon.setLayoutY(this.iconSize/2); // Position at the top (with a small offset if needed)
+        double centerX = (this.width - this.iconSize) / 2;
+        icon.setLayoutX((this.width - iconStartingSize) / 2);
+        icon.setLayoutY(this.iconSize / 2);
 
         // Set the icon's fill color (optional)
         icon.setFill(playerColor);
         getChildren().add(icon);
+    }
+    private String toRGBCode(Color color) {
+        return String.format("#%02X%02X%02X",
+                (int) (color.getRed() * 255),
+                (int) (color.getGreen() * 255),
+                (int) (color.getBlue() * 255));
+    }
+    void updatePlayerStatus(){
+        gameStatus.setText(playerType+"\n"
+                +this.player.getPlayersGamestate());
+        gameStatus.setLayoutX((this.width - gameStatus.getWidth()) / 2);
+    }
+    private void playerStatus(){
+        // Add the Label below the icon
+        playerType = this.isCPU ? "CPU Player" : "Human Player";
+
+        gameStatus.setLayoutY(this.iconSize + 10);
+        gameStatus.setStyle(
+                "-fx-font-size: 14px; " +
+                "-fx-font-size: 14px; " +
+                "-fx-font-weight: bold; " +
+                "-fx-text-alignment: center;" +
+                "-fx-text-fill: " +
+                toRGBCode(playerColor.darker()) + ";");
+        updatePlayerStatus();
+        getChildren().add(gameStatus);
+
+//        String updateGameStatus = "Turn: " ;
+//        String gameState;
+//        gameState = String.valueOf(player.getPlayersGamestate());
+//        updateGameStatus += (player.getColor()=='R') ? "RED" : "BLUE";
+//        updateGameStatus += "\nGame State: "+gameState;
+//        gameStatus.setText(updateGameStatus);
+//        updateCells();
     }
     private Circle drawGamePiece(Color color) {
         Circle gamePiece = new Circle(gamePieceSize, color);
@@ -91,7 +162,7 @@ public class PlayerPanel extends Pane {
             double pieceQueueWidth = this.pieceQueue.getWidth();
 
             this.pieceQueue.setLayoutX(((this.width - pieceQueueWidth) / 2)+pieceShift);
-            this.pieceQueue.setLayoutY(this.iconSize*1.5);
+            this.pieceQueue.setLayoutY(this.iconSize*2);
         });
     }
 

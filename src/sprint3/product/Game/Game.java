@@ -3,8 +3,6 @@ package sprint3.product.Game;
 import sprint3.product.Cell;
 import sprint3.product.CheckMill;
 import sprint3.product.GUI.Board;
-import sprint3.product.Player.CPUPlayer;
-import sprint3.product.Player.HumanPlayer;
 import sprint3.product.Player.Player;
 
 import java.util.*;
@@ -169,17 +167,26 @@ public abstract class Game {
 	}
 
 	// update a player game state based on  the board pieces
-	public abstract void updateGameState();
+	public abstract void updateGameStatePerPlayer(Player player);
+
+	private void updateGameState(){
+		updateGameStatePerPlayer(redPlayer);
+		updateGameStatePerPlayer(bluePlayer);
+	};
 
 	// changes turn to next player and updates
 	public void changeTurn() {
 		this.turnPlayer = (this.turnPlayer.getColor() == 'R') ? this.bluePlayer : this.redPlayer;
 		this.opponentPlayer = (this.opponentPlayer.getColor() == 'B') ? this.redPlayer : this.bluePlayer;
 
-		if (gui!=null)
-			gui.changeTurnPlayerPanel();
-
 		this.updateGameState();
+
+		if (gui!=null) {
+			gui.changeTurnPlayerPanel();
+			gui.updateGameStatus();
+		}
+		System.out.println("redPlayer: " + redPlayer.getPlayersGamestate());
+		System.out.println("bluePlayer: " + bluePlayer.getPlayersGamestate());
 		this.gameOver();
 		this.letCPUMove();
 	}

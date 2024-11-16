@@ -12,14 +12,13 @@ public class NineMMGame extends Game {
 	}
 
 	@Override
-	public void updateGameState(){
-		Player turnPlayer = this.getTurnPlayer();
-		if (turnPlayer.numberOfGamePieces() > 0)
-			turnPlayer.setPlayersGamestate(GameState.PLACING);
-		if (turnPlayer.numberOfGamePieces() <= 0 )
-			turnPlayer.setPlayersGamestate(GameState.MOVING);
-		if (turnPlayer.totalNumberOfPieces() <= 3) {
-			turnPlayer.setPlayersGamestate(GameState.FLYING);
+	public void updateGameStatePerPlayer(Player player){
+		if (player.numberOfGamePieces() > 0)
+			player.setPlayersGamestate(GameState.PLACING);
+		if (player.numberOfGamePieces() <= 0 )
+			player.setPlayersGamestate(GameState.MOVING);
+		if (player.totalNumberOfPieces() <= 3) {
+			player.setPlayersGamestate(GameState.FLYING);
 		}
 	}
 }
