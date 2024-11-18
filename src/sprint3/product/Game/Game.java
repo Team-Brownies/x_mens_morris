@@ -17,11 +17,13 @@ public abstract class Game {
 	private Player opponentPlayer;
 	private Board gui;
 	private GameHistory gameHistory = new GameHistory();
+	private boolean endingGame;
 
 	public Game(int pieces, int size) {
 		this.size = size;
 		this.pieces = pieces;
 		this.grid = new Cell[this.size][this.size];
+		this.endingGame=false;
 		setValid();
 	}
 
@@ -177,6 +179,10 @@ public abstract class Game {
 
 	// changes turn to next player and updates
 	public void changeTurn() {
+		if (this.isEndingGame()) {
+			deleteGame();
+			return; // Exit early if the game has ended
+		}
 		this.turnPlayer = (this.turnPlayer.getColor() == 'R') ? this.bluePlayer : this.redPlayer;
 		this.opponentPlayer = (this.opponentPlayer.getColor() == 'B') ? this.redPlayer : this.bluePlayer;
 
@@ -249,30 +255,29 @@ public abstract class Game {
 
 	// check to see if a mill was formed before changing turns
 	public void checkMill(int row, int col) {
-		CheckMill millChecker = new CheckMill(this.getGrid());
-		Set<int[]> millMates = new HashSet<>();
-		List<int[]> sortedMillMates;
-		if(millChecker.checkMillAllDirections(row, col)){
-			millMates.add(new int[]{row,col});
-			millMates.addAll(millChecker.getMillMates(row, col));
-			sortedMillMates = millChecker.sortMillMatesBySharedPosition(millMates);
+			CheckMill millChecker = new CheckMill(this.getGrid());
+			Set<int[]> millMates = new HashSet<>();
+			List<int[]> sortedMillMates;
+			if (millChecker.checkMillAllDirections(row, col)) {
+				millMates.add(new int[]{row, col});
+				millMates.addAll(millChecker.getMillMates(row, col));
+				sortedMillMates = millChecker.sortMillMatesBySharedPosition(millMates);
 
-			if (gui!=null) {
-				gui.animateMillForm(() -> {
-					// don't change the turn if the player has formed the mill
-					// switch to mill state after animation plays
+				if (gui != null) {
+					gui.animateMillForm(() -> {
+						// don't change the turn if the player has formed the mill
+						// switch to mill state after animation plays
+						this.turnPlayer.setPlayersGamestate(GameState.MILLING);
+						gui.updateGameStatus();
+						this.letCPUMove();
+					}, sortedMillMates);
+				} else {
 					this.turnPlayer.setPlayersGamestate(GameState.MILLING);
-					gui.updateGameStatus();
 					this.letCPUMove();
-				}, sortedMillMates);
+				}
 			} else {
-				this.turnPlayer.setPlayersGamestate(GameState.MILLING);
-				this.letCPUMove();
+				this.changeTurn();
 			}
-		}
-		else{
-			this.changeTurn();
-		}
 	}
 
 	// returns a list of cell coords with a given cellType
@@ -297,4 +302,28 @@ public abstract class Game {
     public void setGameHistory(GameHistory gameHistory) {
         this.gameHistory = gameHistory;
     }
+
+	public void endGame() {
+		this.endingGame=true;
+	}
+	private void deleteGame(){
+		// Perform cleanup of resources
+		this.grid = null;           // Release the grid
+		this.redPlayer = null;      // Release player references
+		this.bluePlayer = null;
+		this.turnPlayer = null;
+		this.opponentPlayer = null;
+		this.gui = null;            // Release GUI reference
+		this.gameHistory = null;    // Release game history
+
+		System.out.println("Game resources have been cleaned up. Exiting the game...");
+		System.out.println("Game has ended.");
+
+		// Suggest garbage collection
+		System.gc();
+	}
+
+	public boolean isEndingGame() {
+		return endingGame;
+	}
 }

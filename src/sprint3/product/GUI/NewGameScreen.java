@@ -11,6 +11,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
 import javafx.util.Duration;
+import sprint3.product.Game.GameMode;
+
 import java.io.File;
 
 //Change this import for every sprint to render the board
@@ -22,12 +24,12 @@ public class NewGameScreen {
 
     private Button gridSizeButton5x5;
     private Button gridSizeButton9x9;
-    private Button gameModeButtonP1vsP2;
-    private Button gameModeButtonP1vsPC;
+    private ToggleSwitch redCPUToggle = new ToggleSwitch(Color.RED);
+    private ToggleSwitch blueCPUToggle = new ToggleSwitch(Color.BLUE);
 
     private Button selectedGridButton;
-    private Button selectedGameModeButton;
-    int gridSelection = 9;
+    private ToggleSwitch selectedGameModeButton;
+    private GameMode gridSelection = GameMode.NINE;
     // Constructor
     public NewGameScreen(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -59,7 +61,7 @@ public class NewGameScreen {
         goBackButton.setOnAction(e -> goBackToHomeScreen());
 
         // "Choose Grid Size" section
-        Text gridSizeTitle = new Text("Grid Size");
+        Text gridSizeTitle = new Text("Game Mode");
         gridSizeTitle.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
         gridSizeTitle.setFill(Color.BLACK);
 //        gridSizeTitle.setEffect(new DropShadow(3.0, 3.0, 3.0, Color.BLACK)); // Drop shadow for better contrast
@@ -69,10 +71,10 @@ public class NewGameScreen {
         gridSizeLayout.setAlignment(Pos.CENTER);
         gridSizeLayout.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-border-width: 2px; -fx-padding: 10px; -fx-background-radius: 10px;");
 
-        gridSizeButton5x5 = createOptionButton("5x5");
-        gridSizeButton5x5.setOnAction(e -> chooseGridSize("5x5"));
-        gridSizeButton9x9 = createOptionButton("9x9");
-        gridSizeButton9x9.setOnAction(e -> chooseGridSize("9x9"));
+        gridSizeButton5x5 = createOptionButton("Six");
+        gridSizeButton5x5.setOnAction(e -> chooseGridSize("Six"));
+        gridSizeButton9x9 = createOptionButton("Nine");
+        gridSizeButton9x9.setOnAction(e -> chooseGridSize("Nine"));
 
         // Set default selection for 9x9
         selectedGridButton = gridSizeButton9x9;
@@ -91,16 +93,25 @@ public class NewGameScreen {
         gameModeLayout.setAlignment(Pos.CENTER);
         gameModeLayout.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-border-width: 2px; -fx-padding: 10px; -fx-background-radius: 10px;");
 
-        gameModeButtonP1vsP2 = createOptionButton("P1 vs P2");
-        gameModeButtonP1vsP2.setOnAction(e -> chooseGameMode("P1 vs P2"));
-        gameModeButtonP1vsPC = createOptionButton("P1 vs PC");
-        gameModeButtonP1vsPC.setOnAction(e -> chooseGameMode("P1 vs PC"));
+
+
+        redCPUToggle.switchedOnProperty().addListener((observable, oldValue, newValue) -> {
+            System.out.println("Switched: " + (newValue ? "ON" : "OFF"));
+        });
+        blueCPUToggle.switchedOnProperty().addListener((observable, oldValue, newValue) -> {
+            System.out.println("Switched: " + (newValue ? "ON" : "OFF"));
+        });
+
+//        redCPU = createOptionButton("P1 vs P2");
+//        redCPU.setOnAction(e -> chooseGameMode("P1 vs P2"));
+//        gameModeButtonP1vsPC = createOptionButton("P1 vs PC");
+//        gameModeButtonP1vsPC.setOnAction(e -> chooseGameMode("P1 vs PC"));
 
         // Set default selection for P1 vs P2
-        selectedGameModeButton = gameModeButtonP1vsP2;
-        gameModeButtonP1vsP2.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-background-color: black; -fx-text-fill: white; -fx-padding: 10px 20px; -fx-border-color: white; -fx-border-width: 2px;");
+//        selectedGameModeButton = redCPUToggle;
+//        redCPUToggle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-background-color: black; -fx-text-fill: white; -fx-padding: 10px 20px; -fx-border-color: white; -fx-border-width: 2px;");
 
-        gameModeLayout.getChildren().addAll(gameModeTitle, gameModeButtonP1vsP2, gameModeButtonP1vsPC);
+        gameModeLayout.getChildren().addAll(gameModeTitle, redCPUToggle, blueCPUToggle);
 
         // Create a container for the Play button
         Button playButton = createButton("Play Game ➔");
@@ -153,22 +164,22 @@ public class NewGameScreen {
     // Action for choosing grid size (5x5 or 9x9)
     private void chooseGridSize(String gridSize) {
         System.out.println("Grid Size Selected: " + gridSize);
-        updateButtonStyle(gridSizeButton5x5, gridSizeButton9x9, gridSize.equals("5x5") ? gridSizeButton5x5 : gridSizeButton9x9);
+        updateButtonStyle(gridSizeButton5x5, gridSizeButton9x9, gridSize.equals("Six") ? gridSizeButton5x5 : gridSizeButton9x9);
 
-        gridSelection = gridSize.equals("9x9") ? 9 : 5;
+        gridSelection = gridSize.equals("Nine") ? GameMode.NINE : GameMode.SIX;
     }
 
     // Action for choosing game mode (P1 vs P2 or P1 vs PC)
     private boolean chooseGameMode(String gameMode) {
         System.out.println("Game Mode Selected: " + gameMode);
-        updateButtonStyle(gameModeButtonP1vsP2, gameModeButtonP1vsPC, gameMode.equals("P1 vs P2") ? gameModeButtonP1vsP2 : gameModeButtonP1vsPC);
+//        updateButtonStyle(redCPUToggle, blueCPUToggle, gameMode.equals("P1 vs P2") ? redCPUToggle : blueCPUToggle);
         return gameMode.equals("P1 vs P2") ? true : false;
     }
 
     // Action for playing the game
     private void playGame() {
         System.out.println("Starting the game...");
-        Board gui = new Board();
+        Board gui = new Board(gridSelection, redCPUToggle.isSwitchedOn(), blueCPUToggle.isSwitchedOn());
         gui.start(primaryStage);
     }
 

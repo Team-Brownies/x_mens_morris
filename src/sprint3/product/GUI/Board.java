@@ -15,9 +15,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import sprint3.product.Cell;
 import sprint3.product.CheckMill;
-import sprint3.product.Game.Game;
-import sprint3.product.Game.GameState;
-import sprint3.product.Game.NineMMGame;
+import sprint3.product.Game.*;
 import sprint3.product.GamePiece;
 import sprint3.product.Player.CPUPlayer;
 import sprint3.product.Player.HumanPlayer;
@@ -28,6 +26,9 @@ import java.util.*;
 
 public class Board extends Application {
 	private final double sceneSize = 450;
+	private final GameMode gameType;
+	private final boolean isRedCPU;
+	private final boolean isBlueCPU;
 	private GameSpace[][] gameSpaces;
 	private PlayerPanel redPanel;
 	private PlayerPanel bluePanel;
@@ -42,23 +43,28 @@ public class Board extends Application {
 	private GameSpace movingGamePiece;
 	private boolean runningAnimation;
 
+	public Board(GameMode gameType, boolean isRedCPU, boolean isBlueCPU) {
+		this.gameType = gameType;
+        this.isRedCPU = isRedCPU;
+        this.isBlueCPU = isBlueCPU;
+    }
+
 	@Override
 	public void start(Stage primaryStage) {
 //		GameHistory history = new GameHistory(this);
 
 		double playerPaneSize = sceneSize/3;
 		if (game == null) {
-			game = new NineMMGame();
-			game.setRedPlayer(new CPUPlayer('R', game));
-			game.setBluePlayer(new CPUPlayer('B', game));
+			loadGameType();
+			setPlayers();
 //		this.redPlayer = ;
 //		this.bluePlayer = new HumanPlayer('B',pieces, this);
 		}
 		game.setGui(this);
 		gameSize = game.getSize();
-		GridPane pane = new GridPane();
-		pane.setBackground(Background.fill(Color.WHITE));
-		pane.setStyle("-fx-border-color: gray; -fx-border-width: 7px;");
+		GridPane gamePane = new GridPane();
+		gamePane.setBackground(Background.fill(Color.WHITE));
+		gamePane.setStyle("-fx-border-color: gray; -fx-border-width: 7px;");
 		gameSpaces = new GameSpace[gameSize][gameSize];
 
 		setUpPlayerPanels(playerPaneSize);
@@ -68,9 +74,9 @@ public class Board extends Application {
 		for (int row = 0; row < gameSize; row++)
 			for (int col = 0; col < gameSize; col++)
 				if (game.getCell(row, col) == Cell.EMPTY) {
-					pane.add(gameSpaces[row][col] = new GameSpace(row, col, true, this), col, row);
+					gamePane.add(gameSpaces[row][col] = new GameSpace(row, col, true, this), col, row);
 				}else {
-					pane.add(gameSpaces[row][col] = new GameSpace(row, col, false, this), col, row);
+					gamePane.add(gameSpaces[row][col] = new GameSpace(row, col, false, this), col, row);
 				}
 
 		// Exit button
@@ -78,9 +84,9 @@ public class Board extends Application {
 		exitButton.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Arial';");
 		exitButton.setOnAction(e -> exitGame(primaryStage));
 
-		// Create the options layout (HBox)
-		HBox optionsLayout = new HBox(20);  // 20px space between children (you can adjust)
-		optionsLayout.setStyle("-fx-padding: 10px; -fx-alignment: TOP_RIGHT;");  // Optional padding for overall HBox
+		// Create the options layout (HBox) // 20px space between children (you can adjust)
+		HBox optionsLayout = new HBox(20);
+		optionsLayout.setStyle("-fx-padding: 10px; -fx-alignment: CENTER;");  // Optional padding for overall HBox
 
 		// Add exit button to the left
 		optionsLayout.getChildren().add(exitButton);
@@ -88,21 +94,41 @@ public class Board extends Application {
 		// Add the undo button to the right
 		optionsLayout.getChildren().add(createRedoButton());
 
-		BorderPane MainPane = new BorderPane();
-		MainPane.setCenter(pane);
-		MainPane.setTop(optionsLayout);
+		BorderPane mainPane = new BorderPane();
+		BorderPane boardPane = new BorderPane();
+		boardPane.setCenter(gamePane);
+		boardPane.setTop(optionsLayout);
 //		MainPane.setBottom(gameStatus);
 
-		MainPane.setLeft(redPanel);
-		MainPane.setRight(bluePanel);
+		mainPane.setCenter(boardPane);
 
-		Scene scene = new Scene(MainPane, sceneSize+(playerPaneSize*2), sceneSize);
+		mainPane.setLeft(redPanel);
+		mainPane.setRight(bluePanel);
+		optionsLayout.setMinHeight(50);
+		Scene scene = new Scene(mainPane, sceneSize+(playerPaneSize*2), sceneSize+optionsLayout.getHeight());
 		primaryStage.setTitle("Nine Men's Morris");
 		primaryStage.setScene(scene);
 		primaryStage.show();
 		game.letCPUMove();
 
 		updateGameStatus();
+	}
+
+	private void setPlayers() {
+		game.setRedPlayer(isRedCPU ? new CPUPlayer('R', game) : new HumanPlayer('R', game));
+		game.setBluePlayer(isBlueCPU ? new CPUPlayer('B', game) : new HumanPlayer('B', game));
+	}
+
+	private void loadGameType() {
+		switch(gameType) {
+			case NINE:
+				game = new NineMMGame();
+				break;
+			case SIX:
+				game = new SixMMGame();
+				break;
+
+		}
 	}
 
 	private void setUpPlayerPanels(double playerPaneSize) {
@@ -115,6 +141,10 @@ public class Board extends Application {
 
 	// updates game status bar
 	public void updateGameStatus(){
+		if (game.isEndingGame()) {
+			cleanBoard();
+			return; // Exit early if the game has ended
+		}
 		turnPlayerPanel.updatePlayerStatus();
 		oppPlayerPanel.updatePlayerStatus();
 
@@ -165,8 +195,29 @@ public class Board extends Application {
 
 	// Function to handle exiting the game or going back to main menu
 	private void exitGame(Stage primaryStage) {
+		game.endGame();
 		Main homeScreen = new Main();
 		homeScreen.start(primaryStage);
+
+		System.gc();
+	}
+
+	private void cleanBoard() {
+		if (game != null) {
+			game = null;
+		}
+
+		if (gameSpaces != null) {
+			for (int row = 0; row < gameSize; row++) {
+				for (int col = 0; col < gameSize; col++) {
+					gameSpaces[row][col] = null;
+				}
+			}
+			gameSpaces = null;
+		}
+		redPanel = null;
+		bluePanel = null;
+		movingGamePiece = null;
 	}
 
 	//undo for undoButton
