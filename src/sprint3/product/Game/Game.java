@@ -18,12 +18,14 @@ public abstract class Game {
 	private Board gui;
 	private GameHistory gameHistory = new GameHistory();
 	private boolean endingGame;
+	private boolean deletedGame;
 
 	public Game(int pieces, int size) {
 		this.size = size;
 		this.pieces = pieces;
 		this.grid = new Cell[this.size][this.size];
 		this.endingGame=false;
+		this.deletedGame=false;
 		setValid();
 	}
 
@@ -181,6 +183,7 @@ public abstract class Game {
 	public void changeTurn() {
 		if (this.isEndingGame()) {
 			deleteGame();
+			this.deletedGame=true;
 			return; // Exit early if the game has ended
 		}
 		this.turnPlayer = (this.turnPlayer.getColor() == 'R') ? this.bluePlayer : this.redPlayer;
@@ -323,7 +326,11 @@ public abstract class Game {
 		System.gc();
 	}
 
-	public boolean isEndingGame() {
+	private boolean isEndingGame() {
 		return endingGame;
+	}
+
+	public boolean isDeletedGame() {
+		return deletedGame;
 	}
 }

@@ -87,17 +87,18 @@ public class GamePiece {
     // update list of Valid Moves Locations
     public void updateValidMovesLocations() {
         List<int[]> validMoves;
+        if(game!=null){
+            game.clearMoveValids();
 
-        game.clearMoveValids();
+            this.clearValidMovesLocation();
 
-        this.clearValidMovesLocation();
+            // only findAdjacentCells for inPlay Pieces
+            if (inPlay) {
+                game.findAdjacentCells(this.location);
+                validMoves = game.getCellsByCellType(this.cellState);
 
-        // only findAdjacentCells for inPlay Pieces
-        if (inPlay){
-            game.findAdjacentCells(this.location);
-            validMoves = game.getCellsByCellType(this.cellState);
-
-            this.validMovesLocations.addAll(validMoves);
+                this.validMovesLocations.addAll(validMoves);
+            }
         }
     }
 

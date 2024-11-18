@@ -141,7 +141,7 @@ public class Board extends Application {
 
 	// updates game status bar
 	public void updateGameStatus(){
-		if (game.isEndingGame()) {
+		if (game.isDeletedGame()) {
 			cleanBoard();
 			return; // Exit early if the game has ended
 		}
@@ -218,6 +218,11 @@ public class Board extends Application {
 		redPanel = null;
 		bluePanel = null;
 		movingGamePiece = null;
+
+
+
+		System.out.println("Board resources have been cleaned up. Exiting the game...");
+		System.out.println("Board has ended.");
 	}
 
 	//undo for undoButton
