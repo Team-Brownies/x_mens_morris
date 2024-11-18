@@ -10,7 +10,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.SVGPath;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -19,10 +18,9 @@ import sprint3.product.CheckMill;
 import sprint3.product.Game.Game;
 import sprint3.product.Game.GameState;
 import sprint3.product.Game.NineMMGame;
-import sprint3.product.Game.SixMMGame;
-import sprint3.product.GameHistory;
 import sprint3.product.GamePiece;
 import sprint3.product.Player.CPUPlayer;
+import sprint3.product.Player.HumanPlayer;
 import sprint3.product.Player.Player;
 
 import java.lang.reflect.Field;
@@ -51,8 +49,8 @@ public class Board extends Application {
 		double playerPaneSize = sceneSize/3;
 		if (game == null) {
 			game = new NineMMGame();
-			game.setRedPlayer(new CPUPlayer('R', game));
-			game.setBluePlayer(new CPUPlayer('B', game));
+			game.setRedPlayer(new HumanPlayer('R', game));
+			game.setBluePlayer(new HumanPlayer('B', game));
 //		this.redPlayer = ;
 //		this.bluePlayer = new HumanPlayer('B',pieces, this);
 		}
@@ -167,7 +165,7 @@ public class Board extends Application {
 
 	// Function to handle exiting the game or going back to main menu
 	private void exitGame(Stage primaryStage) {
-		nineMensMorris.Main homeScreen = new nineMensMorris.Main();
+		Main homeScreen = new Main();
 		homeScreen.start(primaryStage);
 	}
 

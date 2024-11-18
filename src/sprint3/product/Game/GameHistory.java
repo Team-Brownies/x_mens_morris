@@ -15,7 +15,7 @@ public class GameHistory {
     private Deque<String> gameHistory = new LinkedList<String>();
     private BufferedWriter gameLogWriter;
     private static final String LOG_FILE_PATH = "x_mens_morris/src/gamelog.txt";
-    //    private static final String LOG_FILE_PATH = "src/gamelog.txt";
+//        private static final String LOG_FILE_PATH = "src/gamelog.txt";
 //    private Board board;  // Reference to GUI board for move actions
     private GameSpace gameSpace;
 

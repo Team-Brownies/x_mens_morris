@@ -1,4 +1,4 @@
-package nineMensMorris;
+package sprint3.product.GUI;
 
 import javafx.animation.*;
 import javafx.geometry.Pos;
@@ -14,7 +14,7 @@ import javafx.util.Duration;
 import java.io.File;
 
 //Change this import for every sprint to render the board
-import sprint3.product.GUI.Board;
+
 
 public class NewGameScreen {
     private Stage primaryStage;

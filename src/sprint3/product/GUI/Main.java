@@ -1,4 +1,4 @@
-package nineMensMorris;
+package sprint3.product.GUI;
 
 import javafx.animation.*;
 import javafx.application.Application;
@@ -108,7 +108,7 @@ public class Main extends Application {
 
     // Action for opening the New Game screen
     private void openNewGameScreen() {
-        NewGameScreen newGameScreen = new nineMensMorris.NewGameScreen(primaryStage);
+        NewGameScreen newGameScreen = new NewGameScreen(primaryStage);
         newGameScreen.showNewGameScreen();
     }
 
