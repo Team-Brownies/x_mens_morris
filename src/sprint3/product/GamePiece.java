@@ -1,6 +1,7 @@
 package sprint3.product;
 
 import sprint3.product.Game.Game;
+import sprint3.product.Game.GameHistory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +14,7 @@ public class GamePiece {
     private List<int[]> validMovesLocations = new ArrayList<>();
     private final Game game;
     private Cell cellState = Cell.MOVEVALID;
+    private GameHistory gameHistory = new GameHistory();
 
     // a game piece use on game spaces
     public GamePiece(int i, char color, Game game) {
@@ -25,11 +27,14 @@ public class GamePiece {
         this.location[0] = row;
         this.location[1] = col;
         this.updateValidMovesLocations();
+
+
+        gameHistory.logMove(this.id, row, col);
     }
 
     // set the coords (with an array) of this game piece
     public void setLocation(int[] location) {
-        this.location = location;
+        setLocation(location[0], location[1]);
     }
 
     // get the coord of this game piece

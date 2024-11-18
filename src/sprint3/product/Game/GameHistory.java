@@ -1,5 +1,5 @@
 
-package sprint3.product;
+package sprint3.product.Game;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,6 +15,7 @@ public class GameHistory {
     private Deque<String> gameHistory = new LinkedList<String>();
     private BufferedWriter gameLogWriter;
     private static final String LOG_FILE_PATH = "x_mens_morris/src/gamelog.txt";
+    //    private static final String LOG_FILE_PATH = "src/gamelog.txt";
 //    private Board board;  // Reference to GUI board for move actions
     private GameSpace gameSpace;
 
@@ -30,6 +31,37 @@ public class GameHistory {
             } else {
                 gameLogWriter = new BufferedWriter(new FileWriter(logFile, true)); // true = append mode
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public GameHistory() {
+        this.gameSpace = null;  // Store the board reference
+        System.out.println("Log file path: " + new File(LOG_FILE_PATH).getAbsolutePath());
+        try {
+            File logFile = new File(LOG_FILE_PATH);
+
+            // Check if the file exists and clear it (or create a new one if it doesn't)
+            if (logFile.exists()) {
+                gameLogWriter = new BufferedWriter(new FileWriter(logFile, false)); // false = overwrite
+            } else {
+                gameLogWriter = new BufferedWriter(new FileWriter(logFile, true)); // true = append mode
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void logMove(String id, int row, int col) {
+        String moveLog = "ID: "+id+", Row: " + row + ", Col: " + col;
+
+        gameHistory.push(moveLog);
+
+        try {
+            gameLogWriter.write(moveLog);
+            gameLogWriter.newLine();
+            gameLogWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

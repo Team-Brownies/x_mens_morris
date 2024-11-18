@@ -14,7 +14,7 @@ import javafx.util.Duration;
 import sprint3.product.Cell;
 import sprint3.product.Game.Game;
 import sprint3.product.Game.GameState;
-import sprint3.product.GameHistory;
+import sprint3.product.Game.GameHistory;
 import sprint3.product.GamePiece;
 import sprint3.product.Player.Player;
 
@@ -48,7 +48,7 @@ public class GameSpace extends Pane {
             drawLine();
         }
     }
-    
+
     // draw a point on the gameSpace to show the play a piece can be placed here
     private void drawPoint() {
         this.point.centerXProperty().bind(this.widthProperty().divide(2));
@@ -152,7 +152,7 @@ public class GameSpace extends Pane {
 
         return gp;
     }
-    // draws a gamePiece for each valid game space to use 
+    // draws a gamePiece for each valid game space to use
     private void drawSpacesGamePiece() {
         this.gamePiece = drawGamePiece();
         this.gamePiece.setFill(Color.TRANSPARENT);
@@ -231,7 +231,7 @@ public class GameSpace extends Pane {
                     break;
             }
 
-            gameHistory.logMove(this);
+//            gameHistory.logMove(this);
         }
     }
 
