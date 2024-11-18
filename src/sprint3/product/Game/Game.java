@@ -16,6 +16,7 @@ public abstract class Game {
 	private Player turnPlayer;
 	private Player opponentPlayer;
 	private Board gui;
+	private GameHistory gameHistory = new GameHistory();
 
 	public Game(int pieces, int size) {
 		this.size = size;
@@ -187,7 +188,8 @@ public abstract class Game {
 		}
 		System.out.println("redPlayer: " + redPlayer.getPlayersGamestate());
 		System.out.println("bluePlayer: " + bluePlayer.getPlayersGamestate());
-		this.gameOver();
+
+		this.checkForGameOver();
 		this.letCPUMove();
 	}
 
@@ -219,36 +221,26 @@ public abstract class Game {
 	}
 
 	// check to see if the game has ended
-	private void gameOver() {
+	private void checkForGameOver() {
+		GameState state;
 		if(this.turnPlayer.getPlayersGamestate() == GameState.MOVING || this.turnPlayer.getPlayersGamestate() == GameState.FLYING) {
-			GameState state;
-			if(this.turnPlayer.getColor() == 'R'){
-				state = GameState.BLUE_WON;
-			}
-			else{
-				state = GameState.RED_WON;
-			}
-			if (this.turnPlayer.numberOfBoardPieces() < 3) {
-				this.turnPlayer.setPlayersGamestate(state);
-				this.opponentPlayer.setPlayersGamestate(state);
-				if (this.turnPlayer.getColor() == 'R') {
-					System.out.println("Blue player won");
-				} else {
-					System.out.println("Red player won");
-				}
-			} else {
-				if(!this.turnPlayer.canPiecesMove()) {
-					this.turnPlayer.setPlayersGamestate(state);
-					this.opponentPlayer.setPlayersGamestate(state);
-					if (this.turnPlayer.getColor() == 'R') {
-						System.out.println("Blue player won");
-					} else {
-						System.out.println("Red player won");
-					}
-				}
+			if (this.turnPlayer.numberOfBoardPieces() < 3 || !this.turnPlayer.canPiecesMove()) {
+				gameOver();
 			}
 		}
 	}
+
+	private void gameOver(){
+		this.turnPlayer.setPlayersGamestate(GameState.GAMEOVER);
+		this.opponentPlayer.setPlayersGamestate(GameState.GAMEOVER);
+		if (this.turnPlayer.getColor() == 'R') {
+			System.out.println("Blue player won");
+		} else {
+			System.out.println("Red player won");
+		}
+		gui.animateGameOver(this.turnPlayer.getBoardPiecesCoords());
+	}
+
 
 	// check to see if a game piece can be placed based on location of board space
 	public boolean canPlacePiece(int row, int col) {
@@ -297,4 +289,12 @@ public abstract class Game {
 		}
 		return cells;
 	}
+
+    public GameHistory getGameHistory() {
+        return gameHistory;
+    }
+
+    public void setGameHistory(GameHistory gameHistory) {
+        this.gameHistory = gameHistory;
+    }
 }
