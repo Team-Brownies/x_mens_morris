@@ -79,6 +79,16 @@ public abstract class Player {
         return boardPieces;
     }
 
+    // returns the coord of in play game pieces
+    public List<int[]> getBoardPiecesCoords() {
+        List<int[]> coords = new ArrayList<>();
+        for (GamePiece gp:boardPieces){
+            if (gp.isInPlay())
+                coords.add(gp.getLocation());
+        }
+        return coords;
+    }
+
     // returns the number game pieces that are in play
     public int numberOfBoardPieces() {
         return pieceCount;

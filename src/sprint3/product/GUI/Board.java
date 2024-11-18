@@ -2,6 +2,7 @@ package sprint3.product.GUI;
 
 import javafx.animation.*;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Point3D;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -16,12 +17,11 @@ import sprint3.product.CheckMill;
 import sprint3.product.Game.Game;
 import sprint3.product.Game.GameState;
 import sprint3.product.Game.NineMMGame;
-import sprint3.product.Game.SixMMGame;
 import sprint3.product.GamePiece;
 import sprint3.product.Player.CPUPlayer;
-import sprint3.product.Player.HumanPlayer;
 import sprint3.product.Player.Player;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 public class Board extends Application {
@@ -29,7 +29,6 @@ public class Board extends Application {
 	private GameSpace[][] gameSpaces;
 	private PlayerPanel redPanel;
 	private PlayerPanel bluePanel;
-//	private Label gameStatus = new Label("RED's Turn");
 	private Game game;
 	private int gameSize = 0;
 	private PlayerPanel turnPlayerPanel;
@@ -45,8 +44,8 @@ public class Board extends Application {
 	public void start(Stage primaryStage) {
 		double playerPaneSize = sceneSize/3;
 		if (game == null) {
-			game = new SixMMGame();
-			game.setRedPlayer(new HumanPlayer('R', game));
+			game = new NineMMGame();
+			game.setRedPlayer(new CPUPlayer('R', game));
 			game.setBluePlayer(new CPUPlayer('B', game));
 //		this.redPlayer = ;
 //		this.bluePlayer = new HumanPlayer('B',pieces, this);
@@ -222,9 +221,7 @@ public class Board extends Application {
 		Point3D axis = (inCommonIndex==0) ? Rotate.Y_AXIS:Rotate.X_AXIS;
 
 		PauseTransition pauseTransition = new PauseTransition(Duration.millis(0));
-		pauseTransition.setOnFinished(_ ->{
-			this.setRunningAnimation(true);
-		});
+		pauseTransition.setOnFinished(_ -> this.setRunningAnimation(true));
 
 		// Add pause and parallel transitions into a sequential transition to start with a pause
 		SequentialTransition sequentialTransition = new SequentialTransition(pauseTransition, animateEachMillPiece(axis, millMates));
@@ -237,6 +234,168 @@ public class Board extends Application {
 			}
 			this.setRunningAnimation(false);
 		});
+	}
+
+	// animation for a gameOver
+	public void animateGameOver(List<int[]> loserPieces) {
+		SequentialTransition finalTransition = new SequentialTransition();
+
+		PauseTransition piecePause = new PauseTransition(Duration.millis(0));
+		piecePause.setOnFinished(_ -> {
+			this.setRunningAnimation(true);
+		});
+
+		finalTransition.getChildren().add(piecePause);
+
+		for (int[] coords:loserPieces) {
+			Circle gamePiece = this.getGameSpace(coords[0], coords[1]).getGamePiece();
+			Color loserColor = (Color) gamePiece.getFill();
+
+			// Wobble effect
+			ScaleTransition wobble = new ScaleTransition(Duration.millis(50), gamePiece);
+			wobble.setFromX(1.0);
+			wobble.setFromY(1.0);
+			wobble.setToX(1.2);
+			wobble.setToY(1.2);
+			wobble.setCycleCount(10);
+			wobble.setAutoReverse(true);
+
+			// Color pulsing effect
+			FillTransition colorTransition = new FillTransition(Duration.millis(100), gamePiece);
+			colorTransition.setFromValue(loserColor);
+			colorTransition.setToValue(loserColor.darker());
+			colorTransition.setCycleCount(5);
+			colorTransition.setAutoReverse(true);
+			
+			// Grow effect
+			ScaleTransition grow = new ScaleTransition(Duration.millis(500), gamePiece);
+			grow.setFromX(1.0);
+			grow.setFromY(1.0);
+			grow.setToX(1.5);
+			grow.setToY(1.5);
+
+			// Fade Transition
+			FadeTransition fadeTransition = new FadeTransition(Duration.millis(500), gamePiece);
+			fadeTransition.setFromValue(1.0);
+			fadeTransition.setToValue(0);
+
+			SequentialTransition sequentialTransition =
+					new SequentialTransition(
+							new ParallelTransition(wobble, colorTransition),
+							new ParallelTransition(grow, fadeTransition)
+					);
+
+			finalTransition.getChildren().add(sequentialTransition);
+		}
+
+		finalTransition.play();
+
+		finalTransition.setOnFinished(_ -> animateGameOverMessage());
+
+	}
+
+	private void animateGameOverMessage() {
+		Color winnerColor = (game.getOpponentPlayer().getColor() == 'R') ? red : blue;
+		int d = (game.getOpponentPlayer().getColor() == 'R') ? -1 : 1;
+		Label winner = new Label("");
+		int middle = (this.gameSize-1)/2;
+		double gameSpaceSize = this.getGameSpace(0, 0).getWidth();
+
+		winner.setText(getColorName(winnerColor)+"\n"+"Wins");
+
+		winner.setStyle(
+				"-fx-font-size: 14px; " +
+				"-fx-font-size: 14px; " +
+				"-fx-font-weight: bold; " +
+				"-fx-text-alignment: center;" +
+				"-fx-text-fill: " +
+				toRGBCode(winnerColor) + ";"
+		);
+
+		this.getGameSpace(middle, middle).getChildren().add(winner);
+		winner.setVisible(false);
+
+		winner.requestLayout();
+
+		Platform.runLater(() -> {
+			winner.setLayoutX((gameSpaceSize - winner.getWidth()) / 2);
+			winner.setLayoutY((gameSpaceSize - winner.getHeight()) / 2);
+		});
+
+		PauseTransition textPause = new PauseTransition(Duration.millis(0));
+		textPause.setOnFinished(_ -> {
+			winner.setVisible(true);
+		});
+
+		TranslateTransition moveText = new TranslateTransition(Duration.millis(500), winner);
+		moveText.setFromX(d*sceneSize);
+		moveText.setToX(0);
+		moveText.setInterpolator(Interpolator.EASE_OUT);
+
+
+		ScaleTransition growText = new ScaleTransition(Duration.millis(1000), winner);
+		growText.setFromX(1.0);
+		growText.setFromY(1.0);
+		growText.setToX(2.0);
+		growText.setToY(2.0);
+
+		SequentialTransition sequentialTransition = new SequentialTransition(textPause,
+				new ParallelTransition(moveText,growText, animateGlowEffect(winnerColor))
+		);
+
+		sequentialTransition.play();
+
+		sequentialTransition.setOnFinished(_ -> {
+			this.setRunningAnimation(false);
+		});
+
+	}
+
+	private SequentialTransition animateGlowEffect(Color winnerColor) {
+		ParallelTransition finalTransition = new ParallelTransition();
+		Pane[] glows = new Pane[]{redPanel.getGlow(),bluePanel.getGlow()};
+
+		PauseTransition pause = new PauseTransition(Duration.millis(0));
+		pause.setOnFinished(_ -> {
+			redPanel.winnerGlow(winnerColor);
+			bluePanel.winnerGlow(winnerColor);
+		});
+
+//		finalTransition.getChildren().add(pause);
+
+		for (Pane g : glows){
+			// Create the FadeTransition to fade in the shadow
+			FadeTransition fade = new FadeTransition(Duration.millis(1000), g);
+			fade.setFromValue(0); // Start fully transparent
+			fade.setToValue(1); // Fade to fully opaque
+			fade.setInterpolator(Interpolator.EASE_IN);
+			finalTransition.getChildren().add(fade);
+		}
+
+		return new SequentialTransition(pause, finalTransition);
+
+	}
+
+	private static String getColorName(Color c) {
+		for (Field field : Color.class.getFields()) {
+			if (field.getType().equals(Color.class)) {
+				try {
+					if (field.get(null).equals(c)) {
+						String s = field.getName();
+						return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
+					}
+				} catch (IllegalAccessException e) {
+				}
+			}
+		}
+		return "Unknown Color";
+	}
+
+	private String toRGBCode(Color color) {
+		return String.format("#%02X%02X%02X",
+				(int) (color.getRed() * 255),
+				(int) (color.getGreen() * 255),
+				(int) (color.getBlue() * 255));
 	}
 
 	// return the game the gui is using
@@ -263,15 +422,9 @@ public class Board extends Application {
 		return turnPlayerPanel;
 	}
 
-	public PlayerPanel getOppPlayerPanel() {
-		return oppPlayerPanel;
-	}
-
 	public void changeTurnPlayerPanel() {
 		this.turnPlayerPanel = (this.turnPlayerPanel.getPlayerColor() == red) ? this.bluePanel : this.redPanel;
 		this.oppPlayerPanel = (this.oppPlayerPanel.getPlayerColor() == blue) ? this.redPanel : this.bluePanel;
-//		this.turnPlayer = (this.turnPlayer.getColor() == 'R') ? this.bluePlayer : this.redPlayer;
-//		this.opponentPlayer = (this.opponentPlayer.getColor() == 'B') ? this.redPlayer : this.bluePlayer;
 	}
 
 

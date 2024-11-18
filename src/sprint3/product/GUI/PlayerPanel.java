@@ -1,11 +1,13 @@
 package sprint3.product.GUI;
 
+import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.SVGPath;
+import sprint3.product.Game.GameState;
 import sprint3.product.Player.Player;
 
 import java.util.Random;
@@ -24,7 +26,7 @@ public class PlayerPanel extends Pane {
     private boolean isCPU;
     private String playerType;
     private DropShadow turnGlow;
-
+    private Pane glowPane = new Pane();
 
     public PlayerPanel(double playerPaneSize, Color playerColor, Color oppColor, Player player) {
         this.width = playerPaneSize;
@@ -42,13 +44,12 @@ public class PlayerPanel extends Pane {
         drawCaptureSpace();
         addGlow();
 
-//        this.setStyle("-fx-background-color: lightgrey;");
+        this.setStyle("-fx-background-color: lightgrey;");
 
         this.setPrefSize(this.width, this.height);
     }
 
     private void addGlow(){
-        Pane glowPane = new Pane();
         glowPane.setStyle("-fx-background-color: lightgrey;");
         glowPane.setPrefSize(this.width, this.height);
 
@@ -106,8 +107,11 @@ public class PlayerPanel extends Pane {
                 (int) (color.getBlue() * 255));
     }
     void updatePlayerStatus(){
-        gameStatus.setText(playerType+"\n"
-                +this.player.getPlayersGamestate());
+        GameState state = this.player.getPlayersGamestate();
+        String stateText = String.valueOf(state);
+        if (state==GameState.GAMEOVER)
+            stateText = "";
+        gameStatus.setText(playerType+"\n"+stateText);
         gameStatus.setLayoutX((this.width - gameStatus.getWidth()) / 2);
     }
     private void playerStatus(){
@@ -124,14 +128,6 @@ public class PlayerPanel extends Pane {
                 toRGBCode(playerColor.darker()) + ";");
         updatePlayerStatus();
         getChildren().add(gameStatus);
-
-//        String updateGameStatus = "Turn: " ;
-//        String gameState;
-//        gameState = String.valueOf(player.getPlayersGamestate());
-//        updateGameStatus += (player.getColor()=='R') ? "RED" : "BLUE";
-//        updateGameStatus += "\nGame State: "+gameState;
-//        gameStatus.setText(updateGameStatus);
-//        updateCells();
     }
     private Circle drawGamePiece(Color color) {
         Circle gamePiece = new Circle(gamePieceSize, color);
@@ -158,7 +154,7 @@ public class PlayerPanel extends Pane {
         this.pieceQueue.requestLayout();
 //        this.pieceQueue.setStyle("-fx-background-color: black;");
 
-        javafx.application.Platform.runLater(() -> {
+        Platform.runLater(() -> {
             double pieceQueueWidth = this.pieceQueue.getWidth();
 
             this.pieceQueue.setLayoutX(((this.width - pieceQueueWidth) / 2)+pieceShift);
@@ -205,5 +201,15 @@ public class PlayerPanel extends Pane {
 
     public Color getPlayerColor() {
         return playerColor;
+    }
+
+    public void winnerGlow(Color color) {
+        setGlowVisible(true);
+        turnGlow.setColor(color.brighter());
+        turnGlow.setRadius(45);
+        turnGlow.setSpread(0.75);
+    }
+    public Pane getGlow(){
+        return this.glowPane;
     }
 }

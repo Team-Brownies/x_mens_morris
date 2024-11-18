@@ -383,6 +383,7 @@ public class GameSpace extends Pane {
             }
             board.updateGameStatus();
             movingGP.gamePiece.setVisible(true);
+            this.gamePiece.setVisible(true);
             movingGP.getChildren().remove(animateGP);
             board.setRunningAnimation(false);
         });
@@ -420,7 +421,7 @@ public class GameSpace extends Pane {
             if (onFinished != null) {
                 onFinished.run();
             }
-            this.gamePiece.setVisible(true);
+//            this.gamePiece.setVisible(true);
             captureGP.setStroke(borderColor);
             board.updateGameStatus();
             board.setRunningAnimation(false);
