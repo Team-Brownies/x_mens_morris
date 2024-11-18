@@ -4,6 +4,7 @@ import javafx.animation.*;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point3D;
 import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -13,6 +14,7 @@ import javafx.util.Duration;
 import sprint3.product.Cell;
 import sprint3.product.Game.Game;
 import sprint3.product.Game.GameState;
+import sprint3.product.GameHistory;
 import sprint3.product.GamePiece;
 import sprint3.product.Player.Player;
 
@@ -22,9 +24,13 @@ public class GameSpace extends Pane {
     private final Board board;
     private final Game game;
     private final int row, col;
-    private final Circle gamePiece = new Circle();
+    private Circle gamePiece = new Circle();
     private final Circle point = new Circle();
     private char color;
+    private boolean animateRunning;
+    GameHistory gameHistory = new GameHistory(this);
+
+
 
     // a gameSpace used for each tile for the game board
     public GameSpace(int row, int col, boolean valid, Board board) {
@@ -48,7 +54,8 @@ public class GameSpace extends Pane {
         this.point.centerXProperty().bind(this.widthProperty().divide(2));
         this.point.centerYProperty().bind(this.heightProperty().divide(2));
         this.point.radiusProperty().bind(this.widthProperty().divide(8));
-        this.point.setFill(Color.BLACK);
+        this.point.setFill(Color.WHITE);
+        this.point.setStroke(Color.BLACK);
         this.point.setStrokeWidth(2);
 
         if (validLine(this.col, this.row, -1))
@@ -59,8 +66,25 @@ public class GameSpace extends Pane {
             drawPointLine(0.0, 0.5, 0.5, 0.5);  // Left Line
         if (validLine(this.row, this.col, 1))
             drawPointLine(0.5, 0.0, 0.5, 0.5);  // Up Line
+
         getChildren().add(this.point);
-        drawGamePiece();
+
+        this.point.setEffect(addGlow());
+
+        drawSpacesGamePiece();
+    }
+
+    private DropShadow addGlow() {
+        DropShadow glow = new DropShadow();
+
+        glow.setColor(Color.TRANSPARENT);
+
+        glow.setRadius(30);
+        glow.setSpread(0.5);
+        glow.setOffsetX(0);
+        glow.setOffsetY(0);
+
+        return glow;
     }
 
     // find the directions a line need to be drawn to connect valid gameSpace together
@@ -119,15 +143,26 @@ public class GameSpace extends Pane {
         getChildren().add(line);
     }
 
+    // draws a game piece for the board space or to be used in an animation
+    private Circle drawGamePiece() {
+        Circle gp = new Circle();
+        gp.centerXProperty().bind(this.widthProperty().divide(2));
+        gp.centerYProperty().bind(this.heightProperty().divide(2));
+        gp.radiusProperty().bind(this.widthProperty().divide(4));
+
+        return gp;
+    }
     // draws a gamePiece for each valid game space to use 
-    private void drawGamePiece() {
-        this.gamePiece.centerXProperty().bind(this.widthProperty().divide(2));
-        this.gamePiece.centerYProperty().bind(this.heightProperty().divide(2));
-        this.gamePiece.radiusProperty().bind(this.widthProperty().divide(4));
-        this.gamePiece.setStrokeWidth(2);
+    private void drawSpacesGamePiece() {
+        this.gamePiece = drawGamePiece();
         this.gamePiece.setFill(Color.TRANSPARENT);
 
         getChildren().add(this.gamePiece);
+
+        this.gamePiece.setEffect(addGlow());
+        System.out.println("glow");
+        System.out.println(
+                this.gamePiece.getEffect());
     }
 
     // return point that is indicator for a space a game piece can be placed
@@ -135,9 +170,23 @@ public class GameSpace extends Pane {
         return point;
     }
 
+    // sets glow for point
+    public void setPointGlow(Color c) {
+        DropShadow glow = (DropShadow) point.getEffect();
+        if (glow!=null)
+            glow.setColor(c);
+    }
+
     // return game piece that is on this game space
     public Circle getGamePiece() {
         return gamePiece;
+    }
+
+    // sets glow for game piece
+    public void setGamePieceGlow(Color c) {
+        DropShadow glow = (DropShadow) gamePiece.getEffect();
+        if (glow!=null)
+            glow.setColor(c);
     }
 
     // return game space's row
@@ -152,12 +201,7 @@ public class GameSpace extends Pane {
 
     // draw a gamePiece to be used for animations
     private Circle drawAnimationGamePiece(GameSpace gp, Color color) {
-        Circle animateGP = new Circle();
-
-        animateGP.centerXProperty().bind(this.widthProperty().divide(2));
-        animateGP.centerYProperty().bind(this.heightProperty().divide(2));
-        animateGP.radiusProperty().bind(this.widthProperty().divide(4));
-        animateGP.setStrokeWidth(2);
+        Circle animateGP = drawGamePiece();
 
         gp.getChildren().add(animateGP);
         animateGP.setFill(color);
@@ -173,7 +217,7 @@ public class GameSpace extends Pane {
     private void handleMouseClick() {
         Player turnPlayer = game.getTurnPlayer();
         GameState gameState = turnPlayer.getPlayersGamestate();
-        if(!turnPlayer.isCPU()) {
+        if(!turnPlayer.isCPU() && !board.isRunningAnimation()) {
             switch (gameState) {
                 case PLACING:
                     if(game.canPlacePiece(this.row, this.col))
@@ -186,6 +230,8 @@ public class GameSpace extends Pane {
                     turnPlayer.removePiece(this.row, this.col);
                     break;
             }
+
+            gameHistory.logMove(this);
         }
     }
 
@@ -193,14 +239,16 @@ public class GameSpace extends Pane {
     private void handleMovingFlying(Player turnPlayer) {
         GameSpace movingGP = board.getMovingGamePiece();
         GamePiece piece = turnPlayer.getGamePieceByLocation(this.row, this.col);
+        Color pieceColor = (Color) this.gamePiece.getFill();
+
         if (this.color == turnPlayer.getColor()) {
 
             if (movingGP!=null) {
-                movingGP.gamePiece.setStroke(Color.TRANSPARENT);
+                movingGP.setGamePieceGlow(Color.TRANSPARENT);
             }
             board.setMovingGamePiece(this);
 
-            this.gamePiece.setStroke(Color.GREEN);
+            this.setGamePieceGlow(pieceColor.brighter());
             if (turnPlayer.getPlayersGamestate() == GameState.MOVING )
                 piece.updateValidMovesLocations();
             board.highlightCells();
@@ -260,6 +308,7 @@ public class GameSpace extends Pane {
         PauseTransition pauseTransition = new PauseTransition(Duration.millis(0));
         pauseTransition.setOnFinished(_ -> {
             animateGP.setVisible(true);
+            board.setRunningAnimation(true);
         });
 
         ParallelTransition queueParallelTransition = animateQueuePlace(animateGP);
@@ -301,6 +350,7 @@ public class GameSpace extends Pane {
             this.gamePiece.setVisible(true);
             board.updateGameStatus();
             getChildren().remove(animateGP);
+            board.setRunningAnimation(false);
         });
     }
 
@@ -318,6 +368,7 @@ public class GameSpace extends Pane {
         pauseTransition.setOnFinished(_ ->{
             animateGP.setVisible(true);
             updateCell();
+            board.setRunningAnimation(true);
         });
 
         TranslateTransition transition = new TranslateTransition();
@@ -340,6 +391,7 @@ public class GameSpace extends Pane {
             board.updateGameStatus();
             movingGP.gamePiece.setVisible(true);
             movingGP.getChildren().remove(animateGP);
+            board.setRunningAnimation(false);
         });
 
     }
@@ -357,6 +409,7 @@ public class GameSpace extends Pane {
         pauseTransition.setOnFinished(_ ->{
             this.gamePiece.setVisible(false);
             captureGP.setStroke(Color.TRANSPARENT);
+            board.setRunningAnimation(true);
         });
 
         // Translate `panelGamePiece` to match the animateGP start position
@@ -377,12 +430,14 @@ public class GameSpace extends Pane {
             this.gamePiece.setVisible(true);
             captureGP.setStroke(borderColor);
             board.updateGameStatus();
+            board.setRunningAnimation(false);
         });
     }
 
     // update the game piece on this game space
     public void updateCell(){
         Cell cell = game.getCell(row, col);
+
         char color;
 
         if (cell == Cell.RED) {
@@ -394,7 +449,7 @@ public class GameSpace extends Pane {
             color = 'B';
         } else {
             gamePiece.setFill(Color.TRANSPARENT);
-            gamePiece.setStroke(Color.TRANSPARENT);
+            this.setGamePieceGlow(Color.TRANSPARENT);
             color = ' ';
         }
         this.color = color;
