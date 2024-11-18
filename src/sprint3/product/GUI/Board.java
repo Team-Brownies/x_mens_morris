@@ -4,10 +4,12 @@ import javafx.animation.*;
 import javafx.application.Application;
 import javafx.geometry.Point3D;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.SVGPath;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -17,6 +19,7 @@ import sprint3.product.Game.Game;
 import sprint3.product.Game.GameState;
 import sprint3.product.Game.NineMMGame;
 import sprint3.product.Game.SixMMGame;
+import sprint3.product.GameHistory;
 import sprint3.product.GamePiece;
 import sprint3.product.Player.CPUPlayer;
 import sprint3.product.Player.HumanPlayer;
@@ -43,6 +46,8 @@ public class Board extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
+//		GameHistory history = new GameHistory(this);
+
 		double playerPaneSize = sceneSize/3;
 		if (game == null) {
 			game = new SixMMGame();
@@ -54,6 +59,8 @@ public class Board extends Application {
 		game.setGui(this);
 		gameSize = game.getSize();
 		GridPane pane = new GridPane();
+		pane.setBackground(Background.fill(Color.WHITE));
+		pane.setStyle("-fx-border-color: gray; -fx-border-width: 7px;");
 		gameSpaces = new GameSpace[gameSize][gameSize];
 
 		setUpPlayerPanels(playerPaneSize);
@@ -68,15 +75,30 @@ public class Board extends Application {
 					pane.add(gameSpaces[row][col] = new GameSpace(row, col, false, this), col, row);
 				}
 
+		// Exit button
+		Button exitButton = new Button("Exit");
+		exitButton.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Arial';");
+		exitButton.setOnAction(e -> exitGame(primaryStage));
 
-		BorderPane borderPane = new BorderPane();
-		borderPane.setCenter(pane);
-//		borderPane.setBottom(gameStatus);
+		// Create the options layout (HBox)
+		HBox optionsLayout = new HBox(20);  // 20px space between children (you can adjust)
+		optionsLayout.setStyle("-fx-padding: 10px; -fx-alignment: TOP_RIGHT;");  // Optional padding for overall HBox
 
-		borderPane.setLeft(redPanel);
-		borderPane.setRight(bluePanel);
+		// Add exit button to the left
+		optionsLayout.getChildren().add(exitButton);
 
-		Scene scene = new Scene(borderPane, sceneSize+(playerPaneSize*2), sceneSize);
+		// Add the undo button to the right
+		optionsLayout.getChildren().add(createRedoButton());
+
+		BorderPane MainPane = new BorderPane();
+		MainPane.setCenter(pane);
+		MainPane.setTop(optionsLayout);
+//		MainPane.setBottom(gameStatus);
+
+		MainPane.setLeft(redPanel);
+		MainPane.setRight(bluePanel);
+
+		Scene scene = new Scene(MainPane, sceneSize+(playerPaneSize*2), sceneSize);
 		primaryStage.setTitle("Nine Men's Morris");
 		primaryStage.setScene(scene);
 		primaryStage.show();
@@ -142,6 +164,35 @@ public class Board extends Application {
 				break;
 		}
 	}
+
+	// Function to handle exiting the game or going back to main menu
+	private void exitGame(Stage primaryStage) {
+		nineMensMorris.Main homeScreen = new nineMensMorris.Main();
+		homeScreen.start(primaryStage);
+	}
+
+	//undo for undoButton
+	private void undoAction() {
+		// Retrieve the last move from the history
+//		gameHistory.undoMove(game);
+	}
+
+	// Helper method to create the Undo button
+	private Button createRedoButton() {
+		// Create a new button
+		Button redoButton = new Button("Undo");
+
+		redoButton.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Arial';");
+
+		redoButton.setOnAction(e -> {
+			System.out.println("Redo action triggered");
+			undoAction();
+		});
+
+		return redoButton;
+	}
+
+
 	// clear highlights on all points
     public void clearHighlights(){
 		for (int row = 0; row < this.getGameSize(); row++)
