@@ -14,6 +14,7 @@ import javafx.util.Duration;
 import sprint3.product.Cell;
 import sprint3.product.Game.Game;
 import sprint3.product.Game.GameState;
+import sprint3.product.GameHistory;
 import sprint3.product.GamePiece;
 import sprint3.product.Player.Player;
 
@@ -27,6 +28,9 @@ public class GameSpace extends Pane {
     private final Circle point = new Circle();
     private char color;
     private boolean animateRunning;
+    GameHistory gameHistory = new GameHistory(this);
+
+
 
     // a gameSpace used for each tile for the game board
     public GameSpace(int row, int col, boolean valid, Board board) {
@@ -50,7 +54,8 @@ public class GameSpace extends Pane {
         this.point.centerXProperty().bind(this.widthProperty().divide(2));
         this.point.centerYProperty().bind(this.heightProperty().divide(2));
         this.point.radiusProperty().bind(this.widthProperty().divide(8));
-        this.point.setFill(Color.BLACK);
+        this.point.setFill(Color.WHITE);
+        this.point.setStroke(Color.BLACK);
         this.point.setStrokeWidth(2);
 
         if (validLine(this.col, this.row, -1))
@@ -225,6 +230,8 @@ public class GameSpace extends Pane {
                     turnPlayer.removePiece(this.row, this.col);
                     break;
             }
+
+            gameHistory.logMove(this);
         }
     }
 
