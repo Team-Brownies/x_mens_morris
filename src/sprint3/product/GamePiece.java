@@ -29,8 +29,8 @@ public class GamePiece {
         this.location[1] = col;
         this.updateValidMovesLocations();
 
-
-        gameHistory.logMove(this.id, row, col);
+        if(this.inPlay)
+            gameHistory.logMove(this.id, row, col);
     }
 
     // set the coords (with an array) of this game piece

@@ -49,8 +49,8 @@ public class Board extends Application {
 		double playerPaneSize = sceneSize/3;
 		if (game == null) {
 			game = new NineMMGame();
-			game.setRedPlayer(new HumanPlayer('R', game));
-			game.setBluePlayer(new HumanPlayer('B', game));
+			game.setRedPlayer(new CPUPlayer('R', game));
+			game.setBluePlayer(new CPUPlayer('B', game));
 //		this.redPlayer = ;
 //		this.bluePlayer = new HumanPlayer('B',pieces, this);
 		}
