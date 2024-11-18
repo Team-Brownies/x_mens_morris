@@ -1,1 +1,6 @@
-ID: R4, Row: 3, Col: 0
+ID: R1, Row: 6, Col: 0
+ID: B1, Row: 5, Col: 1
+ID: R2, Row: 4, Col: 2
+ID: B2, Row: 2, Col: 4
+ID: R3, Row: 1, Col: 5
+ID: B3, Row: 0, Col: 6

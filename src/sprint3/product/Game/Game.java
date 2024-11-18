@@ -16,6 +16,7 @@ public abstract class Game {
 	private Player turnPlayer;
 	private Player opponentPlayer;
 	private Board gui;
+	private GameHistory gameHistory = new GameHistory();
 
 	public Game(int pieces, int size) {
 		this.size = size;
@@ -288,4 +289,12 @@ public abstract class Game {
 		}
 		return cells;
 	}
+
+    public GameHistory getGameHistory() {
+        return gameHistory;
+    }
+
+    public void setGameHistory(GameHistory gameHistory) {
+        this.gameHistory = gameHistory;
+    }
 }

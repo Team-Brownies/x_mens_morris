@@ -14,12 +14,13 @@ public class GamePiece {
     private List<int[]> validMovesLocations = new ArrayList<>();
     private final Game game;
     private Cell cellState = Cell.MOVEVALID;
-    private GameHistory gameHistory = new GameHistory();
+    private final GameHistory gameHistory;
 
     // a game piece use on game spaces
     public GamePiece(int i, char color, Game game) {
         this.id = color+String.valueOf(i);
         this.game = game;
+        this.gameHistory = game.getGameHistory();
     }
 
     // set the coords of this game piece
