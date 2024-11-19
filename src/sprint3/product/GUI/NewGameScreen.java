@@ -184,11 +184,17 @@ public class NewGameScreen {
                 redSelecter.isSwitchedOn(),
                 blueSelecter.isSwitchedOn(),
                 redSelecter.getDifficultyValue(),
-                blueSelecter.getDifficultyValue()
+                blueSelecter.getDifficultyValue(),
+                this
         );
         gui.start(primaryStage);
     }
+    //restartGame
+    public void restartGame(){
+        System.out.println("Restarting the game...");
+        playGame();
 
+    }
     // Helper method to create general buttons
     private Button createButton(String text) {
         Button button = new Button(text);

@@ -29,6 +29,7 @@ public class Board extends Application {
 	private final GameMode gameType;
 	private final boolean isRedCPU;
 	private final boolean isBlueCPU;
+	private final NewGameScreen gameMenu;
 	private GameSpace[][] gameSpaces;
 	private PlayerPanel redPanel;
 	private PlayerPanel bluePanel;
@@ -46,12 +47,20 @@ public class Board extends Application {
 	private int redDifficulty;
 	private int blueDifficulty;
 
-	public Board(GameMode gameType, boolean isRedCPU, boolean isBlueCPU, int redDifficulty, int blueDifficulty) {
+	public Board(
+			GameMode gameType,
+			boolean isRedCPU,
+			boolean isBlueCPU,
+			int redDifficulty,
+			int blueDifficulty,
+			NewGameScreen gameMenu
+	) {
 		this.gameType = gameType;
         this.isRedCPU = isRedCPU;
         this.isBlueCPU = isBlueCPU;
 		this.redDifficulty = redDifficulty;
 		this.blueDifficulty = blueDifficulty;
+		this.gameMenu = gameMenu;
     }
 
 	@Override
@@ -88,6 +97,10 @@ public class Board extends Application {
 		Button exitButton = new Button("Exit");
 		exitButton.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Arial';");
 		exitButton.setOnAction(e -> exitGame(primaryStage));
+		// Restart button
+		Button restartButton = new Button("Restart");
+		restartButton.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Arial';");
+		restartButton.setOnAction(e -> restartGame(gameMenu));
 
 		// Create the options layout (HBox) // 20px space between children (you can adjust)
 		HBox optionsLayout = new HBox(20);
@@ -101,6 +114,7 @@ public class Board extends Application {
 						"-fx-alignment: center;" +
 						"-fx-background-color: lightgrey;"
 		);
+		optionsLayout.getChildren().add(restartButton);
 
 		// Add exit button to the left
 		optionsLayout.getChildren().add(exitButton);
@@ -220,6 +234,14 @@ public class Board extends Application {
 
 		System.gc();
 	}
+
+	private void restartGame(NewGameScreen gameMenu) {
+		game.endGame();
+		gameMenu.restartGame();
+
+		System.gc();
+	}
+
 
 	private void cleanBoard() {
 		if (game != null) {
@@ -433,7 +455,6 @@ public class Board extends Application {
 
 		winner.setStyle(
 				"-fx-font-size: 14px; " +
-				"-fx-font-size: 14px; " +
 				"-fx-font-weight: bold; " +
 				"-fx-text-alignment: center;" +
 				"-fx-text-fill: " +
@@ -475,8 +496,40 @@ public class Board extends Application {
 
 		sequentialTransition.setOnFinished(_ -> {
 			this.setRunningAnimation(false);
+//			this.autoRestart(winnerColor, winner);
 		});
 
+	}
+
+	private void autoRestart(Color winnerColor, Label text) {
+		SequentialTransition countdownSequence = new SequentialTransition();
+
+		PauseTransition startPause = new PauseTransition(Duration.seconds(0));
+		startPause.setOnFinished(_ -> {
+			text.setStyle("-fx-font-size: 7px;"+
+					"-fx-font-weight: bold; " +
+					"-fx-text-alignment: center;" +
+					"-fx-text-fill: " +
+					toRGBCode(winnerColor) + ";");
+					text.setText("Restarting");
+		});
+
+		startPause.play();
+
+		for (int i = 5; i >= 0; i--) {
+			StringBuilder dots = new StringBuilder();
+			dots.append(" .".repeat(Math.max(0, i + 1)));
+
+			PauseTransition countdownPause = new PauseTransition(Duration.seconds(1));
+			countdownPause.setOnFinished(_ -> {
+				text.setText(String.valueOf(dots));
+			});
+
+			countdownSequence.getChildren().add(countdownPause);
+		}
+
+		countdownSequence.play();
+		countdownSequence.setOnFinished(_->restartGame(gameMenu));
 	}
 
 	private SequentialTransition animateGlowEffect(Color winnerColor) {

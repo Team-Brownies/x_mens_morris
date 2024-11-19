@@ -43,7 +43,7 @@ public class GameSpace extends Pane {
         if (valid){
             drawPoint();
             this.setOnMouseClicked(_ -> handleMouseClick());
-            getChildren().add(new Label(row+", "+col));
+//            getChildren().add(new Label(row+", "+col));
         } else {
             drawLine();
         }
