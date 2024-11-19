@@ -9,6 +9,7 @@ import sprint3.product.GamePiece;
 import java.util.*;
 
 public class CPUPlayer extends Player{
+
     private enum Difficulty {
         EASY, NORMAL, HARD
     }
@@ -17,30 +18,27 @@ public class CPUPlayer extends Player{
     private Difficulty difficulty;
 
     // changes player so a cpu can control
-    public CPUPlayer(char color, Game game) {
+    public CPUPlayer(char color, Game game, int difficulty) {
         super(color, game);
         setCpu(true);
         this.game = this.getGame();
         this.gridSize = this.game.getSize();
-        setDifficulty(3);
+        setDifficulty(difficulty);
     }
 
     public CPUPlayer(char color, Game game, boolean startDisable) {
-        this(color, game);
+        this(color, game, 3);
         // starts as disabled to set up board
         setCpu(false);
-        // starts at hardest difficulty
-        setDifficulty(3);
     }
 
     // sets Difficulty of the CPU Player
     public void setDifficulty(int d) {
-        if (d>=3)
-            this.difficulty=Difficulty.HARD;
-        else if(d==2)
-            this.difficulty=Difficulty.NORMAL;
-        else
-            this.difficulty=Difficulty.EASY;
+        this.difficulty = switch (d) {
+            case 3 -> Difficulty.HARD;
+            case 2 -> Difficulty.NORMAL;
+            default -> Difficulty.EASY;
+        };
     }
 
 

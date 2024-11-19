@@ -24,11 +24,11 @@ public class NewGameScreen {
 
     private Button gridSizeButton5x5;
     private Button gridSizeButton9x9;
-    private ToggleSwitch redCPUToggle = new ToggleSwitch(Color.RED);
-    private ToggleSwitch blueCPUToggle = new ToggleSwitch(Color.BLUE);
+    private final PlayerSelector redSelecter = new PlayerSelector('1');
+    private final PlayerSelector blueSelecter = new PlayerSelector('2');
 
     private Button selectedGridButton;
-    private ToggleSwitch selectedGameModeButton;
+//    private PlayerSelecter selectedGameModeButton;
     private GameMode gridSelection = GameMode.NINE;
     // Constructor
     public NewGameScreen(Stage primaryStage) {
@@ -95,12 +95,12 @@ public class NewGameScreen {
 
 
 
-        redCPUToggle.switchedOnProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println("Switched: " + (newValue ? "ON" : "OFF"));
-        });
-        blueCPUToggle.switchedOnProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println("Switched: " + (newValue ? "ON" : "OFF"));
-        });
+//        redCPUToggle.switchedOnProperty().addListener((observable, oldValue, newValue) -> {
+//            System.out.println("Switched: " + (newValue ? "ON" : "OFF"));
+//        });
+//        blueSelecter.switchedOnProperty().addListener((observable, oldValue, newValue) -> {
+//            System.out.println("Switched: " + (newValue ? "ON" : "OFF"));
+//        });
 
 //        redCPU = createOptionButton("P1 vs P2");
 //        redCPU.setOnAction(e -> chooseGameMode("P1 vs P2"));
@@ -111,7 +111,8 @@ public class NewGameScreen {
 //        selectedGameModeButton = redCPUToggle;
 //        redCPUToggle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-background-color: black; -fx-text-fill: white; -fx-padding: 10px 20px; -fx-border-color: white; -fx-border-width: 2px;");
 
-        gameModeLayout.getChildren().addAll(gameModeTitle, redCPUToggle, blueCPUToggle);
+//        gameModeLayout.getChildren().addAll(gameModeTitle, redCPUToggle, blueSelecter);
+        gameModeLayout.getChildren().addAll(redSelecter, blueSelecter);
 
         // Create a container for the Play button
         Button playButton = createButton("Play Game ➔");
@@ -141,7 +142,7 @@ public class NewGameScreen {
 
     // Helper method to set the background image for the New Game screen
     private void setBackgroundImage(Pane layout) {
-        File imageFile = new File("x_mens_morris/src/nmmBg.jpg"); // Image located in the root directory
+        File imageFile = new File("src/nmmBg.jpg"); // Image located in the root directory
         if (imageFile.exists()) {
             Image image = new Image(imageFile.toURI().toString());
             BackgroundImage backgroundImage = new BackgroundImage(image,
@@ -172,14 +173,19 @@ public class NewGameScreen {
     // Action for choosing game mode (P1 vs P2 or P1 vs PC)
     private boolean chooseGameMode(String gameMode) {
         System.out.println("Game Mode Selected: " + gameMode);
-//        updateButtonStyle(redCPUToggle, blueCPUToggle, gameMode.equals("P1 vs P2") ? redCPUToggle : blueCPUToggle);
+//        updateButtonStyle(redCPUToggle, blueSelecter, gameMode.equals("P1 vs P2") ? redCPUToggle : blueSelecter);
         return gameMode.equals("P1 vs P2") ? true : false;
     }
 
     // Action for playing the game
     private void playGame() {
         System.out.println("Starting the game...");
-        Board gui = new Board(gridSelection, redCPUToggle.isSwitchedOn(), blueCPUToggle.isSwitchedOn());
+        Board gui = new Board(gridSelection,
+                redSelecter.isSwitchedOn(),
+                blueSelecter.isSwitchedOn(),
+                redSelecter.getDifficultyValue(),
+                blueSelecter.getDifficultyValue()
+        );
         gui.start(primaryStage);
     }
 

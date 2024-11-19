@@ -42,11 +42,16 @@ public class Board extends Application {
 
 	private GameSpace movingGamePiece;
 	private boolean runningAnimation;
+	private Label gameStatus = new Label("");
+	private int redDifficulty;
+	private int blueDifficulty;
 
-	public Board(GameMode gameType, boolean isRedCPU, boolean isBlueCPU) {
+	public Board(GameMode gameType, boolean isRedCPU, boolean isBlueCPU, int redDifficulty, int blueDifficulty) {
 		this.gameType = gameType;
         this.isRedCPU = isRedCPU;
         this.isBlueCPU = isBlueCPU;
+		this.redDifficulty = redDifficulty;
+		this.blueDifficulty = blueDifficulty;
     }
 
 	@Override
@@ -86,7 +91,16 @@ public class Board extends Application {
 
 		// Create the options layout (HBox) // 20px space between children (you can adjust)
 		HBox optionsLayout = new HBox(20);
-		optionsLayout.setStyle("-fx-padding: 10px; -fx-alignment: CENTER;");  // Optional padding for overall HBox
+		optionsLayout.setStyle("-fx-padding: 10px; -fx-alignment: TOP_RIGHT; -fx-background-color: lightgrey;");  // Optional padding for overall HBox
+
+		gameStatus.setStyle(
+				"-fx-font-size: 14px; " +
+						"-fx-font-size: 14px; " +
+						"-fx-font-weight: bold; " +
+						"-fx-text-alignment: center;" +
+						"-fx-alignment: center;" +
+						"-fx-background-color: lightgrey;"
+		);
 
 		// Add exit button to the left
 		optionsLayout.getChildren().add(exitButton);
@@ -95,17 +109,18 @@ public class Board extends Application {
 		optionsLayout.getChildren().add(createRedoButton());
 
 		BorderPane mainPane = new BorderPane();
-		BorderPane boardPane = new BorderPane();
-		boardPane.setCenter(gamePane);
-		boardPane.setTop(optionsLayout);
-//		MainPane.setBottom(gameStatus);
 
-		mainPane.setCenter(boardPane);
-
+		mainPane.setCenter(gamePane);
 		mainPane.setLeft(redPanel);
 		mainPane.setRight(bluePanel);
+		mainPane.setTop(optionsLayout);
+		mainPane.setBottom(gameStatus);
+
 		optionsLayout.setMinHeight(50);
-		Scene scene = new Scene(mainPane, sceneSize+(playerPaneSize*2), sceneSize+optionsLayout.getHeight());
+		gameStatus.setMinHeight(50);
+
+		gameStatus.setMinWidth(sceneSize+(playerPaneSize*2));
+		Scene scene = new Scene(mainPane, sceneSize+(playerPaneSize*2), sceneSize+100);
 		primaryStage.setTitle("Nine Men's Morris");
 		primaryStage.setScene(scene);
 		primaryStage.show();
@@ -115,8 +130,9 @@ public class Board extends Application {
 	}
 
 	private void setPlayers() {
-		game.setRedPlayer(isRedCPU ? new CPUPlayer('R', game) : new HumanPlayer('R', game));
-		game.setBluePlayer(isBlueCPU ? new CPUPlayer('B', game) : new HumanPlayer('B', game));
+		game.setRedPlayer(isRedCPU ? new CPUPlayer('R', game, this.redDifficulty) : new HumanPlayer('R', game));
+		game.setBluePlayer(isBlueCPU ? new CPUPlayer('B', game, this.blueDifficulty) : new HumanPlayer('B', game));
+
 	}
 
 	private void loadGameType() {
@@ -145,8 +161,11 @@ public class Board extends Application {
 			cleanBoard();
 			return; // Exit early if the game has ended
 		}
-		turnPlayerPanel.updatePlayerStatus();
-		oppPlayerPanel.updatePlayerStatus();
+		String gameState = String.valueOf(game.getTurnPlayer().getPlayersGamestate());
+		Color turnColor = game.getTurnPlayer().getColor()=='R' ? red : blue;
+
+		gameStatus.setText(gameState);
+		gameStatus.setTextFill(turnColor.darker());
 
 		turnPlayerPanel.setGlowVisible(true);
 		oppPlayerPanel.setGlowVisible(false);
@@ -345,9 +364,13 @@ public class Board extends Application {
 	// animation for a gameOver
 	public void animateGameOver(List<int[]> loserPieces) {
 		SequentialTransition finalTransition = new SequentialTransition();
+		Color winnerColor = (game.getOpponentPlayer().getColor() == 'R') ? red : blue;
 
 		PauseTransition piecePause = new PauseTransition(Duration.millis(0));
 		piecePause.setOnFinished(_ -> {
+			gameStatus.setTextFill(winnerColor);
+			redPanel.setGlowVisible(false);
+			bluePanel.setGlowVisible(false);
 			this.setRunningAnimation(true);
 		});
 
@@ -396,12 +419,11 @@ public class Board extends Application {
 
 		finalTransition.play();
 
-		finalTransition.setOnFinished(_ -> animateGameOverMessage());
+		finalTransition.setOnFinished(_ -> animateGameOverMessage(winnerColor));
 
 	}
 
-	private void animateGameOverMessage() {
-		Color winnerColor = (game.getOpponentPlayer().getColor() == 'R') ? red : blue;
+	private void animateGameOverMessage(Color winnerColor) {
 		int d = (game.getOpponentPlayer().getColor() == 'R') ? -1 : 1;
 		Label winner = new Label("");
 		int middle = (this.gameSize-1)/2;

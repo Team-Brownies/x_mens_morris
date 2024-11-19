@@ -195,8 +195,6 @@ public abstract class Game {
 			gui.changeTurnPlayerPanel();
 			gui.updateGameStatus();
 		}
-		System.out.println("redPlayer: " + redPlayer.getPlayersGamestate());
-		System.out.println("bluePlayer: " + bluePlayer.getPlayersGamestate());
 
 		this.checkForGameOver();
 		this.letCPUMove();

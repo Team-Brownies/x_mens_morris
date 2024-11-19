@@ -19,7 +19,6 @@ public class PlayerPanel extends Pane {
     private final double gamePieceSize;
     private GridPane pieceQueue = new GridPane();
     private Pane captureSpace = new Pane();
-    private Label gameStatus = new Label("");
     private Color playerColor;
     private Color oppColor;
     private Player player;
@@ -37,6 +36,8 @@ public class PlayerPanel extends Pane {
         this.iconSize = this.width / 3;
         this.gamePieceSize = this.width/10;
         this.isCPU = player.isCPU();
+
+        setMouseTransparent(true);
 
         addIcon();
         playerStatus();
@@ -62,7 +63,7 @@ public class PlayerPanel extends Pane {
 
         turnGlow = new DropShadow();
         turnGlow.setColor(playerColor.brighter());
-        turnGlow.setRadius(30);
+        turnGlow.setRadius(60);
         turnGlow.setSpread(0.5);
         turnGlow.setOffsetX(0);
         turnGlow.setOffsetY(0);
@@ -106,27 +107,31 @@ public class PlayerPanel extends Pane {
                 (int) (color.getGreen() * 255),
                 (int) (color.getBlue() * 255));
     }
-    void updatePlayerStatus(){
-        GameState state = this.player.getPlayersGamestate();
-        String stateText = String.valueOf(state);
-        if (state==GameState.GAMEOVER)
-            stateText = "";
-        gameStatus.setText(playerType+"\n"+stateText);
-        gameStatus.setLayoutX((this.width - gameStatus.getWidth()) / 2);
-    }
+//    void updatePlayerStatus(){
+//        GameState state = this.player.getPlayersGamestate();
+//        String stateText = String.valueOf(state);
+//        if (state==GameState.GAMEOVER)
+//            stateText = "";
+//        gameStatus.setText(playerType+"\n"+stateText);
+//        gameStatus.setLayoutX((this.width - gameStatus.getWidth()) / 2);
+//    }
     private void playerStatus(){
+        Label gameStatus = new Label("");
         // Add the Label below the icon
-        playerType = this.isCPU ? "CPU Player" : "Human Player";
-
+        playerType = this.isCPU ? "CPU" : "Human";
+        gameStatus.setText(playerType+"\nPlayer");
         gameStatus.setLayoutY(this.iconSize + 10);
         gameStatus.setStyle(
                 "-fx-font-size: 14px; " +
                 "-fx-font-size: 14px; " +
                 "-fx-font-weight: bold; " +
                 "-fx-text-alignment: center;" +
+                "-fx-alignment: center;" +
                 "-fx-text-fill: " +
                 toRGBCode(playerColor.darker()) + ";");
-        updatePlayerStatus();
+//        updatePlayerStatus();
+
+        gameStatus.setMinWidth(this.width);
         getChildren().add(gameStatus);
     }
     private Circle drawGamePiece(Color color) {
@@ -204,10 +209,16 @@ public class PlayerPanel extends Pane {
     }
 
     public void winnerGlow(Color color) {
+        Pane pane = new Pane();
+        pane.setPrefSize(this.width, this.height);
+        pane.setStyle("-fx-background-color: lightgrey;");
+        getChildren().add(pane);
+        pane.toBack();
+        glowPane.toBack();
         setGlowVisible(true);
         turnGlow.setColor(color.brighter());
-        turnGlow.setRadius(45);
-        turnGlow.setSpread(0.75);
+        turnGlow.setRadius(90);
+        turnGlow.setSpread(0.3);
     }
     public Pane getGlow(){
         return this.glowPane;

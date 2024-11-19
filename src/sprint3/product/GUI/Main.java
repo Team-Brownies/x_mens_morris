@@ -93,7 +93,7 @@ public class Main extends Application {
 
     // Helper method to set the background image
     private void setBackgroundImage(Pane layout) {
-        File imageFile = new File("x_mens_morris/src/nmmBg.jpg"); // Image located in the root directory
+        File imageFile = new File("src/nmmBg.jpg"); // Image located in the root directory
         if (imageFile.exists()) {      Image image = new Image(imageFile.toURI().toString());
             BackgroundImage backgroundImage = new BackgroundImage(image,
                     BackgroundRepeat.NO_REPEAT,   // No repeat horizontally
