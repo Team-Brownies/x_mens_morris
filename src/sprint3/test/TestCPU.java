@@ -16,7 +16,7 @@ public class TestCPU {
 	private NineMMGame board;
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		board = new NineMMGame();
 		board.setRedPlayer(new HumanPlayer('R', board));
 		board.setBluePlayer(new CPUPlayer('B', board, true));
@@ -47,7 +47,7 @@ public class TestCPU {
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 	}
 
 	// acceptance criterion 12.1

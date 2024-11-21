@@ -13,8 +13,7 @@ public class CPUPlayer extends Player{
     private enum Difficulty {
         EASY, NORMAL, HARD
     }
-    private Game game;
-    private int gridSize;
+    private final Game game;
     private Difficulty difficulty;
 
     // changes player so a cpu can control
@@ -22,14 +21,13 @@ public class CPUPlayer extends Player{
         super(color, game);
         setCpu(true);
         this.game = this.getGame();
-        this.gridSize = this.game.getSize();
         setDifficulty(difficulty);
     }
 
     public CPUPlayer(char color, Game game, boolean startDisable) {
         this(color, game, 3);
         // starts as disabled to set up board
-        setCpu(false);
+        setCpu(!startDisable);
     }
 
     // sets Difficulty of the CPU Player
@@ -45,7 +43,7 @@ public class CPUPlayer extends Player{
 
     // generates random number to pick from list of valid moves
     private int getRandom(int n){
-        int random = 0;
+        int random;
 
         random = (int) (Math.random() * n);
         return random;
@@ -110,6 +108,7 @@ public class CPUPlayer extends Player{
     private int[] genRemove(){
         int[] removePiece;
         int[] randomRemove = getRandomRemovePiece();
+        int[] blockRemove = getNonTrappedRemove();
         GameState oppGameState = game.getOpponentPlayer().getPlayersGamestate();
 
         removePiece = switch (oppGameState) {
@@ -118,21 +117,44 @@ public class CPUPlayer extends Player{
             default -> null;
         };
 
+
+
         // remove a piece that can
-        return getMoveBaseOnDifficulty(null, removePiece, randomRemove);
+        return getMoveBaseOnDifficulty(removePiece, blockRemove, randomRemove);
     }
     // returns a random piece that is able to be removed
     private int[] getRandomRemovePiece() {
-        CheckMill gameMillCecker = new CheckMill(game.getGrid());
-
         List<int[]> oppRemovablePieces = new ArrayList<>();
         List<int[]> oppGameSpaces = game.getAllCellsOfAType(this.getOpponentTag());
+
         for (int[] piece:oppGameSpaces){
-            if(!(gameMillCecker.checkMillAllDirections(piece[0], piece[1]) && game.getOppFreePieces())){
-                oppRemovablePieces.add(new int[]{piece[0], piece[1]});
+            if(validForRemove(piece)){
+                    oppRemovablePieces.add(piece);
             }
         }
         return oppRemovablePieces.get(getRandom(oppRemovablePieces.size()));
+    }
+
+    private int[] getNonTrappedRemove(){
+        List<int[]> oppRemovablePieces = new ArrayList<>();
+        Player oppPlayer = game.getOpponentPlayer();
+
+        List<GamePiece> movablePieces = playersMovablePieces(oppPlayer);
+
+        for (GamePiece piece:movablePieces){
+            int[] loc = piece.getLocation();
+            if(validForRemove(loc)){
+                oppRemovablePieces.add(loc);
+            }
+        }
+        return oppRemovablePieces.get(getRandom(oppRemovablePieces.size()));
+
+    }
+
+    private boolean validForRemove(int[] piece){
+        CheckMill gameMillChecker = new CheckMill(game.getGrid());
+        return !(gameMillChecker.checkMillAllDirections(piece[0], piece[1]) &&
+                game.getOppFreePieces());
     }
     // return a mill mate of a mill the Opponent could make there next turn (during placing phase)
     private int[] getRemovePieceForPlacing() {
@@ -164,7 +186,7 @@ public class CPUPlayer extends Player{
         int[] removePiece = null;
         Cell[][] tempGrid = game.makeTempGrid();
         CheckMill testMillChecker = new CheckMill(tempGrid);
-        CheckMill gameMillCecker = new CheckMill(game.getGrid());
+        CheckMill gameMillChecker = new CheckMill(game.getGrid());
         Set<int[]> millMates = new HashSet<>();
         Cell oppTag = this.getOpponentTag();
 
@@ -186,7 +208,7 @@ public class CPUPlayer extends Player{
 
             // finds piece that isn't in another mill
             removePiece = millMates.stream()
-                    .filter(piece -> !gameMillCecker.checkMillAllDirections(piece[0], piece[1]))
+                    .filter(piece -> !gameMillChecker.checkMillAllDirections(piece[0], piece[1]))
                     .findFirst()
                     .orElse(null);  // returns null if no matching element is found
         }
@@ -231,9 +253,6 @@ public class CPUPlayer extends Player{
     @Override
     public void makeCPUMove() {
         GameState gameState = this.getPlayersGamestate();
-//        Board gui = getGame().getGui();
-//
-//        gui.updateGameStatus();
         switch (gameState) {
             case PLACING:
                 placingLogic();
