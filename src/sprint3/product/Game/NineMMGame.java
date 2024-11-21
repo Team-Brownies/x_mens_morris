@@ -17,8 +17,9 @@ public class NineMMGame extends Game {
 			player.setPlayersGamestate(GameState.PLACING);
 		if (player.numberOfGamePieces() <= 0 )
 			player.setPlayersGamestate(GameState.MOVING);
-		if (player.totalNumberOfPieces() <= 3) {
+		if (player.totalNumberOfPieces() <= 3 && player.numberOfGamePieces()==0) {
 			player.setPlayersGamestate(GameState.FLYING);
+			player.setGamePiecesToFlying();
 		}
 	}
 }

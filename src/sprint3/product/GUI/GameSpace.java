@@ -43,7 +43,7 @@ public class GameSpace extends Pane {
         if (valid){
             drawPoint();
             this.setOnMouseClicked(_ -> handleMouseClick());
-//            getChildren().add(new Label(row+", "+col));
+            getChildren().add(new Label(row+", "+col));
         } else {
             drawLine();
         }
@@ -160,9 +160,6 @@ public class GameSpace extends Pane {
         getChildren().add(this.gamePiece);
 
         this.gamePiece.setEffect(addGlow());
-        System.out.println("glow");
-        System.out.println(
-                this.gamePiece.getEffect());
     }
 
     // return point that is indicator for a space a game piece can be placed
@@ -217,6 +214,7 @@ public class GameSpace extends Pane {
     private void handleMouseClick() {
         Player turnPlayer = game.getTurnPlayer();
         GameState gameState = turnPlayer.getPlayersGamestate();
+        System.out.println(game.getGrid()[row][col]);
         if(!turnPlayer.isCPU() && !board.isRunningAnimation()) {
             switch (gameState) {
                 case PLACING:
@@ -251,8 +249,9 @@ public class GameSpace extends Pane {
             this.setGamePieceGlow(pieceColor.brighter());
             if (turnPlayer.getPlayersGamestate() == GameState.MOVING )
                 piece.updateValidMovesLocations();
+
             board.highlightCells();
-        } else if (game.getCell(this.row, this.col) == game.movingOrFlying() && movingGP != null) {
+        } else if (game.movingOrFlying(this.row, this.col) && movingGP != null) {
             turnPlayer.movePiece(this.row, this.col, movingGP.row, movingGP.col);
             board.setMovingGamePiece(null);
         }
@@ -265,9 +264,6 @@ public class GameSpace extends Pane {
         animateGP.setLayoutY(-200);
         Bounds animateStartBounds = this.localToScene(animateGP.getBoundsInLocal());
         Bounds queuePieceBounds = panelGamePiece.localToScene(panelGamePiece.getBoundsInLocal());
-
-        System.out.println("a: "+animateStartBounds.getWidth());
-        System.out.println("q: "+animateStartBounds.getHeight());
 
         // Translate `panelGamePiece` to match the animateGP start position
         TranslateTransition queueMoveTransition = new TranslateTransition(Duration.millis(500), panelGamePiece);

@@ -1,5 +1,6 @@
 package sprint3.product.Game;
 
+import javafx.scene.paint.Color;
 import sprint3.product.Cell;
 import sprint3.product.CheckMill;
 import sprint3.product.GUI.Board;
@@ -129,11 +130,13 @@ public abstract class Game {
 	}
 
 	// Gets cell name for make a move in a moving or flying state
-	public Cell movingOrFlying(){
-		Cell cell;
-		cell = (this.turnPlayer.getPlayersGamestate() == GameState.MOVING) ? Cell.MOVEVALID : Cell.EMPTY;
-		return cell;
-	}
+	public boolean movingOrFlying(int row, int col){
+        if (Objects.requireNonNull(this.turnPlayer.getPlayersGamestate()) == GameState.FLYING) {
+            if (this.getCell(row, col) == Cell.EMPTY)
+                return true;
+        }
+        return this.getCell(row, col) == Cell.MOVEVALID;
+    }
 
 	// Checks to see if Opponent has any pieces not in mills before letting the player remove a piece in a mill
 	public boolean getOppFreePieces(){
@@ -228,24 +231,36 @@ public abstract class Game {
 	}
 
 	// check to see if the game has ended
-	private void checkForGameOver() {
-		GameState state;
-		if(this.turnPlayer.getPlayersGamestate() == GameState.MOVING || this.turnPlayer.getPlayersGamestate() == GameState.FLYING) {
-			if (this.turnPlayer.numberOfBoardPieces() < 3 || !this.turnPlayer.canPiecesMove()) {
-				gameOver();
+	public void checkForGameOver() {
+		GameState state = this.turnPlayer.getPlayersGamestate();
+		if(state == GameState.MOVING || state == GameState.FLYING) {
+			if (this.turnPlayer.totalNumberOfPieces() < 3 || !this.turnPlayer.canPiecesMove()) {
+				gameOver(GameState.GAMEOVER);
+			}
+			else if (this.turnPlayer.totalNumberOfPieces()==3
+					&& this.opponentPlayer.totalNumberOfPieces()==3
+				    && !this.turnPlayer.canWinThisTurn()
+			){
+				gameOver(GameState.DRAW);
 			}
 		}
 	}
 
-	private void gameOver(){
-		this.turnPlayer.setPlayersGamestate(GameState.GAMEOVER);
-		this.opponentPlayer.setPlayersGamestate(GameState.GAMEOVER);
-		if (this.turnPlayer.getColor() == 'R') {
-			System.out.println("Blue player won");
+	private void gameOver(GameState state){
+		this.turnPlayer.setPlayersGamestate(state);
+		this.opponentPlayer.setPlayersGamestate(state);
+		if(gui!=null){
+			switch (state){
+				case GAMEOVER -> gui.animateGameOver(this.turnPlayer.getBoardPiecesCoords());
+				case DRAW -> gui.tiedGame();
+			}
 		} else {
-			System.out.println("Red player won");
+			System.out.println(switch (state){
+				case GAMEOVER -> ((this.turnPlayer.getColor() == 'R') ? "Blue":"Red")+" player won!";
+				case DRAW -> "Game is a Draw";
+				default -> "";
+			});
 		}
-		gui.animateGameOver(this.turnPlayer.getBoardPiecesCoords());
 	}
 
 
@@ -285,7 +300,6 @@ public abstract class Game {
 	public List<int[]> getCellsByCellType(Cell cellType){
 		Cell[][] grid = this.getGrid();
 		List<int[]> cells = new ArrayList<>();
-
 		for (int row = 0; row < this.size; row++) {
 			for (int col = 0; col < this.size; col++) {
 				if (grid[row][col] == cellType) {
@@ -331,4 +345,14 @@ public abstract class Game {
 	public boolean isDeletedGame() {
 		return deletedGame;
 	}
+
+	// make a temp grid to test outcome of a possible move
+	public Cell[][] makeTempGrid(){
+		Cell[][] grid = this.getGrid();
+		return Arrays.stream(grid)
+				.map(Cell[]::clone)
+				.toArray(Cell[][]::new);
+	}
+
+
 }

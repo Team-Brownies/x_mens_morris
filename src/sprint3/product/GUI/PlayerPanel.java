@@ -141,6 +141,9 @@ public class PlayerPanel extends Pane {
         return gamePiece;
     }
     private void drawPieceQueue(){
+        int numberOfGamePieces = player.numberOfGamePieces();
+        int col = 3;
+        int row = (int) Math.ceil((double) numberOfGamePieces / col);
         int pieceShift = 10;
 //        double height = this.height / 3;
 //        this.pieceQueue.setPrefSize(this.width, height);
@@ -148,12 +151,17 @@ public class PlayerPanel extends Pane {
         getChildren().add(this.pieceQueue);
 //        this.pieceQueue.setStyle("-fx-background-color: black;");
 
-        for (int i = 0; i < player.numberOfGamePieces() / 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                Circle gp = drawGamePiece(this.playerColor);
-                gp.setTranslateX(-(i * pieceShift));
-                gp.setTranslateY(-(j * (pieceShift/1.5)));
-                this.pieceQueue.add(gp, i, j);
+        int pieceLeft = 0;
+
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                if (pieceLeft < numberOfGamePieces) {
+                    Circle gp = drawGamePiece(this.playerColor);
+                    gp.setTranslateX(-(i * pieceShift));
+                    gp.setTranslateY(-(j * (pieceShift / 1.5)));
+                    this.pieceQueue.add(gp, i, j);
+                    pieceLeft++;
+                }
             }
         }
         this.pieceQueue.requestLayout();

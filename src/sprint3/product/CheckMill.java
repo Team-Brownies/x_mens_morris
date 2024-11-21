@@ -44,12 +44,19 @@ public class CheckMill {
     // return a set of pieces a mill is in with
     public Set<int[]> getMillMates(int row, int col){
         Set<int[]> millMates = new HashSet<>();
-        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        int[][] directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
         int[] coords = new int[]{row,col};
 
         if (checkMillAllDirections(row, col)){
-            for (int[] dir : directions) {
-                millMates.addAll(searchForMillMates(dir[0], dir[1], coords));
+            for (int i = 0; i < directions.length; i++) {
+                if(i % 2 == 0) {
+                    millMates = new HashSet<>();
+                }
+                millMates.addAll(searchForMillMates(directions[i][0], directions[i][1], coords));
+
+                if (millMates.size() == 3) {
+                    return millMates;
+                }
             }
         } else {
             return null;

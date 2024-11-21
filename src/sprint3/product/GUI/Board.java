@@ -146,7 +146,8 @@ public class Board extends Application {
 	private void setPlayers() {
 		game.setRedPlayer(isRedCPU ? new CPUPlayer('R', game, this.redDifficulty) : new HumanPlayer('R', game));
 		game.setBluePlayer(isBlueCPU ? new CPUPlayer('B', game, this.blueDifficulty) : new HumanPlayer('B', game));
-
+//		game.getRedPlayer().setGamePiecesTo(4);
+//		game.getBluePlayer().setGamePiecesTo(3);
 	}
 
 	private void loadGameType() {
@@ -221,7 +222,7 @@ public class Board extends Application {
 				highlightForMoving();
 				break;
 			case FLYING:
-				highlightForFlying();
+				highlightForMoving();
 				break;
 		}
 	}
@@ -313,8 +314,8 @@ public class Board extends Application {
 		GameSpace movingGP = this.getMovingGamePiece();
 		for (int row = 0; row < this.getGameSize(); row++)
 			for (int col = 0; col < this.getGameSize(); col++)
-				if (game.getCell(row, col) == game.movingOrFlying() && movingGP != null)
-					this.getGameSpace(row, col).getPoint().setStroke(Color.GREEN);
+				if (game.movingOrFlying(row, col) && movingGP != null)
+					this.getGameSpace(row, col).setPointGlow(Color.GREEN.brighter());
 	}
 	// run animation each piece in the mill
 	private SequentialTransition animateEachMillPiece(Point3D axis, List<int[]> sortedMillMates){
@@ -445,13 +446,17 @@ public class Board extends Application {
 
 	}
 
-	private void animateGameOverMessage(Color winnerColor) {
+	public void animateGameOverMessage(Color winnerColor) {
 		int d = (game.getOpponentPlayer().getColor() == 'R') ? -1 : 1;
 		Label winner = new Label("");
 		int middle = (this.gameSize-1)/2;
 		double gameSpaceSize = this.getGameSpace(0, 0).getWidth();
 
-		winner.setText(getColorName(winnerColor)+"\n"+"Wins");
+		if (winnerColor==red ||winnerColor==blue)
+			winner.setText(getColorName(winnerColor)+"\n"+"Wins");
+		else {
+			winner.setText("Draw");
+		}
 
 		winner.setStyle(
 				"-fx-font-size: 14px; " +
@@ -474,6 +479,7 @@ public class Board extends Application {
 		PauseTransition textPause = new PauseTransition(Duration.millis(0));
 		textPause.setOnFinished(_ -> {
 			winner.setVisible(true);
+			gameStatus.setTextFill(winnerColor.darker());
 		});
 
 		TranslateTransition moveText = new TranslateTransition(Duration.millis(500), winner);
@@ -499,6 +505,16 @@ public class Board extends Application {
 //			this.autoRestart(winnerColor, winner);
 		});
 
+	}
+
+	public void tiedGame() {
+		Color color1 = this.red;
+		Color color2 = this.blue;
+		double red = ((color1.getRed() + color2.getRed()) / 2);
+		double green = ((color1.getGreen() + color2.getGreen()) / 2);
+		double blue = ((color1.getBlue() + color2.getBlue()) / 2);
+
+		animateGameOverMessage(new Color(red, green, blue, 1));
 	}
 
 	private void autoRestart(Color winnerColor, Label text) {

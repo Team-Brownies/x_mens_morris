@@ -8,10 +8,7 @@ import sprint3.product.Game.Game;
 import sprint3.product.Game.GameState;
 import sprint3.product.GamePiece;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 
 public abstract class Player {
     private char color;
@@ -95,8 +92,8 @@ public abstract class Player {
     }
 
     // debug for testing changes the starting number of pieces to 3 to test flying
-    public void setGamePiecesForFlying(){
-        while(this.numberOfGamePieces()>3){
+    public void setGamePiecesTo(int number){
+        while(this.numberOfGamePieces()>number){
             gamePieces.pop();
         }
     }
@@ -256,11 +253,78 @@ public abstract class Player {
     // check to see if the player can move any of their game piece
     public boolean canPiecesMove(){
         List<GamePiece> movablePieces = playersMovablePieces(this);
-        for (GamePiece p : boardPieces) {
-            if(!movablePieces.isEmpty())
-                return true;
+
+        if(movablePieces.isEmpty() && numberOfGamePieces()==0) {
+            System.out.println(color+" color has no movable pieces.");
+            return false;
         }
-        System.out.println(color+" color has no movable pieces.");
-        return false;
+        return true;
+    }
+
+    public boolean canWinThisTurn(){
+        return findMillOrBlock(this, "Mill")!=null;
+    }
+
+    // find what piece that when moved can result in a Mill or Block
+    protected int[][] findMillOrBlock(Player player, String type) {
+        int[] millMove = null;
+        int[] blockMove = null;
+        List<GamePiece> movablePieces = playersMovablePieces(player);
+
+        Cell playerTag = player.getPlayerTag();
+        Cell oppTag = player.getOpponentTag();
+
+        for (GamePiece piece : movablePieces){
+            int[] coords = piece.getLocation();
+            List<int[]> validMoveSpaces;
+
+            piece.updateValidMovesLocations();
+            validMoveSpaces = piece.getValidMovesLocations();
+
+            for (int[] newSpace : validMoveSpaces){
+                Cell[][] tempGrid = game.makeTempGrid();
+                tempGrid[coords[0]][coords[1]] = Cell.EMPTY;
+                // return Mill if found
+                switch (type){
+                    case "Mill":
+                        millMove = findMillMove(newSpace, tempGrid, playerTag);
+                        // return Mill Move if found
+                        if (millMove!=null) {
+                            return new int[][]{coords, millMove};
+                        }
+                        break;
+                    case "Block":
+                        blockMove = findMillMove(newSpace, tempGrid, oppTag);
+                        // return Block Move if found
+                        if (blockMove!=null) {
+                            return new int[][]{coords, blockMove};
+                        }
+                }
+            }
+
+        }
+        return null;
+    }
+
+    // find a move that will result in a mill be formed
+    protected int[] findMillMove(int[] move, Cell[][] tempGrid, Cell tag){
+        CheckMill millChecker;
+        tempGrid[move[0]][move[1]] = tag;
+
+        millChecker = new CheckMill(tempGrid);
+
+        if (millChecker.checkMillAllDirections(move[0], move[1])) {
+            return move;
+        }
+        return null;
+    }
+
+    public void setGamePiecesToFlying() {
+        for (GamePiece piece:boardPieces){
+            piece.setCellStateForFlying();
+        }
+        for (GamePiece piece:gamePieces){
+            piece.setCellStateForFlying();
+        }
     }
 }
