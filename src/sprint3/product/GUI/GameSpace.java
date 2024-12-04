@@ -28,7 +28,6 @@ public class GameSpace extends Pane {
     private final Circle point = new Circle();
     private char color;
     private boolean animateRunning;
-    GameHistory gameHistory = new GameHistory(this);
 
 
 

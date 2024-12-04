@@ -6,9 +6,10 @@ public class NineMMGame extends Game {
 
 	private static final int pieces = 9;
 	private static final int size = 7;
+	private static final GameMode gameMode = GameMode.NINE;
 
 	public NineMMGame() {
-		super(pieces, size);
+		super(pieces, size, gameMode);
 	}
 
 	@Override

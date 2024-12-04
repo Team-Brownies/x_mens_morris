@@ -1,6 +1,5 @@
 package sprint3.product.Game;
 
-import javafx.scene.paint.Color;
 import sprint3.product.Cell;
 import sprint3.product.CheckMill;
 import sprint3.product.GUI.Board;
@@ -21,12 +20,13 @@ public abstract class Game {
 	private boolean endingGame;
 	private boolean deletedGame;
 
-	public Game(int pieces, int size) {
+	public Game(int pieces, int size, GameMode gameMode) {
 		this.size = size;
 		this.pieces = pieces;
-		this.grid = new Cell[this.size][this.size];
+        this.grid = new Cell[this.size][this.size];
 		this.endingGame=false;
 		this.deletedGame=false;
+		gameHistory.setGameMode(gameMode);
 		setValid();
 	}
 
@@ -167,7 +167,7 @@ public abstract class Game {
 		return cells;
 	}
 	// Updated the game spaces to check for adjacent game spaces
-	public void clearMoveValids(){
+	public void clearMoveValid(){
 		for (int row = 0; row < this.size; ++row)
 			for (int col = 0; col < this.size; ++col)
 				if(getCell(row, col) == Cell.MOVEVALID)
@@ -236,12 +236,14 @@ public abstract class Game {
 		if(state == GameState.MOVING || state == GameState.FLYING) {
 			if (this.turnPlayer.totalNumberOfPieces() < 3 || !this.turnPlayer.canPiecesMove()) {
 				gameOver(GameState.GAMEOVER);
+				gameHistory.close();
 			}
 			else if (this.turnPlayer.totalNumberOfPieces()==3
 					&& this.opponentPlayer.totalNumberOfPieces()==3
 				    && !this.turnPlayer.canWinThisTurn()
 			){
 				gameOver(GameState.DRAW);
+				gameHistory.close();
 			}
 		}
 	}

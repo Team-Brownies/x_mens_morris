@@ -242,7 +242,15 @@ public abstract class Player {
         }
         return null;
     }
-
+    // searches for a player's GamePiece with the given ID
+    public int[] getGamePieceCoordsById(String id) {
+        System.out.println(id);
+        for (GamePiece p : boardPieces){
+            if (p.getPieceById(id))
+                return p.getLocation();
+        }
+        return null;
+    }
     // updates the valid moves locations of all of player's pieces
     private void updateValidMovesLocations(){
         for (GamePiece p : boardPieces) {

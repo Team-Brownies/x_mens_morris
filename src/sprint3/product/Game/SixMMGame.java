@@ -6,9 +6,10 @@ public class SixMMGame extends Game {
 
 	private static final int pieces = 6;
 	private static final int size = 5;
+	private static final GameMode gameMode = GameMode.SIX;
 
 	public SixMMGame() {
-		super(pieces, size);
+		super(pieces, size, gameMode);
 	}
 
 	// Flying is not used in Six Man's Morris

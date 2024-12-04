@@ -1,5 +1,6 @@
 package sprint3.product.GUI;
 
+import com.google.gson.JsonArray;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -20,6 +21,7 @@ import sprint3.product.GamePiece;
 import sprint3.product.Player.CPUPlayer;
 import sprint3.product.Player.HumanPlayer;
 import sprint3.product.Player.Player;
+import sprint3.product.Player.ScriptedPlayer;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -27,9 +29,12 @@ import java.util.*;
 public class Board extends Application {
 	private final double sceneSize = 450;
 	private final GameMode gameType;
+	private final boolean isReplay;
 	private final boolean isRedCPU;
 	private final boolean isBlueCPU;
 	private final NewGameScreen gameMenu;
+	private final JsonArray moveArray;
+	private final Main replayPage;
 	private GameSpace[][] gameSpaces;
 	private PlayerPanel redPanel;
 	private PlayerPanel bluePanel;
@@ -46,33 +51,44 @@ public class Board extends Application {
 	private Label gameStatus = new Label("");
 	private int redDifficulty;
 	private int blueDifficulty;
+	private ReplayControls replayControls;
+	private boolean animateOff;
 
 	public Board(
-			GameMode gameType,
-			boolean isRedCPU,
-			boolean isBlueCPU,
-			int redDifficulty,
-			int blueDifficulty,
-			NewGameScreen gameMenu
-	) {
+            GameMode gameType,
+            boolean isRedCPU,
+            boolean isBlueCPU,
+            int redDifficulty,
+            int blueDifficulty,
+            NewGameScreen gameMenu
+    ) {
 		this.gameType = gameType;
+        this.isReplay=false;
+		this.moveArray = null;
         this.isRedCPU = isRedCPU;
         this.isBlueCPU = isBlueCPU;
 		this.redDifficulty = redDifficulty;
 		this.blueDifficulty = blueDifficulty;
 		this.gameMenu = gameMenu;
+		this.replayPage = null;
     }
+	public Board(GameMode gameType, JsonArray moveArray, Main replayPage) {
+        this.gameType = gameType;
+		this.isReplay=true;
+		this.isRedCPU = true;
+		this.isBlueCPU = true;
+		this.gameMenu = null;
+		this.replayPage = replayPage;
+		this.moveArray = moveArray;
+	}
 
 	@Override
 	public void start(Stage primaryStage) {
-//		GameHistory history = new GameHistory(this);
 
 		double playerPaneSize = sceneSize/3;
 		if (game == null) {
 			loadGameType();
 			setPlayers();
-//		this.redPlayer = ;
-//		this.bluePlayer = new HumanPlayer('B',pieces, this);
 		}
 		game.setGui(this);
 		gameSize = game.getSize();
@@ -100,8 +116,10 @@ public class Board extends Application {
 		// Restart button
 		Button restartButton = new Button("Restart");
 		restartButton.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Arial';");
-		restartButton.setOnAction(e -> restartGame(gameMenu));
-
+		if (!isReplay)
+			restartButton.setOnAction(e -> restartGame(gameMenu));
+		else
+			restartButton.setOnAction(e -> restartReplay());
 		// Create the options layout (HBox) // 20px space between children (you can adjust)
 		HBox optionsLayout = new HBox(20);
 		optionsLayout.setStyle("-fx-padding: 10px; -fx-alignment: TOP_RIGHT; -fx-background-color: lightgrey;");  // Optional padding for overall HBox
@@ -130,6 +148,9 @@ public class Board extends Application {
 		mainPane.setTop(optionsLayout);
 		mainPane.setBottom(gameStatus);
 
+		if(isReplay)
+			addReplayControls(optionsLayout);
+
 		optionsLayout.setMinHeight(50);
 		gameStatus.setMinHeight(50);
 
@@ -143,11 +164,26 @@ public class Board extends Application {
 		updateGameStatus();
 	}
 
+	private void addReplayControls(HBox optionsLayout) {
+		assert moveArray != null;
+		this.replayControls = new ReplayControls(moveArray, game);
+		optionsLayout.getChildren().add(replayControls);
+	}
+
+	public void setReplaySeekSlider(int turnNumber) {
+		this.replayControls.setSeek(turnNumber);
+	}
+
 	private void setPlayers() {
-		game.setRedPlayer(isRedCPU ? new CPUPlayer('R', game, this.redDifficulty) : new HumanPlayer('R', game));
-		game.setBluePlayer(isBlueCPU ? new CPUPlayer('B', game, this.blueDifficulty) : new HumanPlayer('B', game));
-//		game.getRedPlayer().setGamePiecesTo(4);
-//		game.getBluePlayer().setGamePiecesTo(3);
+		if (isReplay){
+			animateOff = true;
+			game.setRedPlayer(new ScriptedPlayer('R', game, moveArray, this));
+			game.setBluePlayer(new ScriptedPlayer('B', game, moveArray, this));
+		} else {
+			animateOff = false;
+			game.setRedPlayer(isRedCPU ? new CPUPlayer('R', game, this.redDifficulty) : new HumanPlayer('R', game));
+			game.setBluePlayer(isBlueCPU ? new CPUPlayer('B', game, this.blueDifficulty) : new HumanPlayer('B', game));
+		}
 	}
 
 	private void loadGameType() {
@@ -218,22 +254,19 @@ public class Board extends Application {
 		GameState gameState = turnPlayer.getPlayersGamestate();
 		clearHighlights();
 		switch (gameState) {
-			case MOVING:
+			case MOVING, FLYING:
 				highlightForMoving();
 				break;
-			case FLYING:
-				highlightForMoving();
-				break;
-		}
+        }
 	}
 
 	// Function to handle exiting the game or going back to main menu
 	private void exitGame(Stage primaryStage) {
 		game.endGame();
 		Main homeScreen = new Main();
-		homeScreen.start(primaryStage);
+        homeScreen.start(primaryStage);
 
-		System.gc();
+        System.gc();
 	}
 
 	private void restartGame(NewGameScreen gameMenu) {
@@ -243,7 +276,12 @@ public class Board extends Application {
 		System.gc();
 	}
 
+	public void restartReplay() {
+		game.endGame();
+        replayPage.viewReplay();
 
+		System.gc();
+	}
 	private void cleanBoard() {
 		if (game != null) {
 			game = null;
@@ -363,6 +401,12 @@ public class Board extends Application {
 	}
 	// run animation for when a mill is formed
 	public void animateMillForm(Runnable onFinished, List<int[]> millMates) {
+		if(animateOff){
+			if (onFinished != null) {
+				onFinished.run();
+			}
+			return;
+		}
 		CheckMill millChecker = new CheckMill(game.getGrid());
 
 		int inCommonIndex = millChecker.findCommonIndex(millMates);
@@ -636,5 +680,13 @@ public class Board extends Application {
 
 	public void setRunningAnimation(boolean runningAnimation) {
 		this.runningAnimation = runningAnimation;
+	}
+
+	public boolean isAnimateOff() {
+		return animateOff;
+	}
+
+	public void setAnimateOff(boolean animateOff) {
+		this.animateOff = animateOff;
 	}
 }

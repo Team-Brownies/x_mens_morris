@@ -52,7 +52,6 @@ public class PlayerSelector extends StackPane {
 
         StackPane.setMargin(playerLabel, new javafx.geometry.Insets(0, 70, 75, 70));
 
-        // Add a listener to update the label when the slider value changes
         difficulty.valueProperty().addListener((_, _, newValue) -> {
             double value = (double) newValue;
             int roundedValue = (int) Math.round(value);
@@ -60,7 +59,6 @@ public class PlayerSelector extends StackPane {
             this.difficultyValue = roundedValue;
         });
 
-        // Set custom labels for the ticks
         difficulty.setLabelFormatter(new javafx.util.StringConverter<>() {
             @Override
             public String toString(Double value) {

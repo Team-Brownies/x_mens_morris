@@ -88,7 +88,7 @@ public class GamePiece {
     public void updateValidMovesLocations() {
         List<int[]> validMoves = new ArrayList<>();
         if(game!=null){
-            game.clearMoveValids();
+            game.clearMoveValid();
 
             this.clearValidMovesLocation();
 
@@ -114,5 +114,10 @@ public class GamePiece {
         for (int[] move:validMovesLocations){
             System.out.println("("+move[0]+", "+move[1]+")");
         }
+    }
+
+    public boolean getPieceById(String id) {
+        System.out.println(this.id+" "+id);
+        return Objects.equals(this.id, id);
     }
 }
