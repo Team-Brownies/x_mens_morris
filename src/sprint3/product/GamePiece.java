@@ -3,9 +3,7 @@ package sprint3.product;
 import sprint3.product.Game.Game;
 import sprint3.product.Game.GameHistory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class GamePiece {
     private final String id;
@@ -13,7 +11,7 @@ public class GamePiece {
     private boolean inPlay = true;
     private List<int[]> validMovesLocations = new ArrayList<>();
     private final Game game;
-    private Cell cellState = Cell.MOVEVALID;
+    private Set<Cell> cellState = new HashSet<>();
     private final GameHistory gameHistory;
 
     // a game piece use on game spaces
@@ -21,6 +19,7 @@ public class GamePiece {
         this.id = color+String.valueOf(i);
         this.game = game;
         this.gameHistory = game.getGameHistory();
+        this.cellState.add(Cell.MOVEVALID);
     }
 
     // set the coords of this game piece
@@ -33,19 +32,9 @@ public class GamePiece {
         gameHistory.logMove(this.id, row, col);
     }
 
-    // set the coords (with an array) of this game piece
-    public void setLocation(int[] location) {
-        setLocation(location[0], location[1]);
-    }
-
     // get the coord of this game piece
     public int[] getLocation() {
         return location;
-    }
-
-    // get id a game piece
-    public String getId() {
-        return id;
     }
 
     // is this game piece in play or have it been milled
@@ -67,12 +56,6 @@ public class GamePiece {
         this.updateValidMovesLocations();
     }
 
-    // prints the location of game piece
-    public void printLocation(){
-        if (this.inPlay)
-            System.out.println("ID: "+id+" ("+ this.location[0]+", "+this.location[1]+")");
-    }
-
     // return list of space the game piece is able to move to
     public List<int[]> getValidMovesLocations() {
         return validMovesLocations;
@@ -81,23 +64,26 @@ public class GamePiece {
     // changes the cell type this game piece is looking
     // for with it searches for a Valid Moves Locations
     public void setCellStateForFlying() {
-        this.cellState = Cell.EMPTY;
+        this.cellState.add(Cell.EMPTY);
     }
 
     // update list of Valid Moves Locations
     public void updateValidMovesLocations() {
-        List<int[]> validMoves;
+        List<int[]> validMoves = new ArrayList<>();
+        if(game!=null){
+            game.clearMoveValid();
 
-        game.clearMoveValids();
+            this.clearValidMovesLocation();
 
-        this.clearValidMovesLocation();
+            // only findAdjacentCells for inPlay Pieces
+            if (inPlay) {
+                game.findAdjacentCells(this.location);
+                for (Cell state:this.cellState) {
+                    validMoves.addAll(game.getCellsByCellType(state));
+                }
 
-        // only findAdjacentCells for inPlay Pieces
-        if (inPlay){
-            game.findAdjacentCells(this.location);
-            validMoves = game.getCellsByCellType(this.cellState);
-
-            this.validMovesLocations.addAll(validMoves);
+                this.validMovesLocations=validMoves;
+            }
         }
     }
 
@@ -106,10 +92,7 @@ public class GamePiece {
         this.validMovesLocations.clear();
     }
 
-    // prints list of Valid Moves Locations
-    public void printValidMoves() {
-        for (int[] move:validMovesLocations){
-            System.out.println("("+move[0]+", "+move[1]+")");
-        }
+    public boolean getPieceById(String id) {
+        return Objects.equals(this.id, id);
     }
 }

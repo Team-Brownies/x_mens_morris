@@ -17,11 +17,16 @@ public abstract class Game {
 	private Player opponentPlayer;
 	private Board gui;
 	private GameHistory gameHistory = new GameHistory();
+	private boolean endingGame;
+	private boolean deletedGame;
 
-	public Game(int pieces, int size) {
+	public Game(int pieces, int size, GameMode gameMode) {
 		this.size = size;
 		this.pieces = pieces;
-		this.grid = new Cell[this.size][this.size];
+        this.grid = new Cell[this.size][this.size];
+		this.endingGame=false;
+		this.deletedGame=false;
+		gameHistory.setGameMode(gameMode);
 		setValid();
 	}
 
@@ -95,14 +100,6 @@ public abstract class Game {
 
 		for (int[] dir : directions) {
 			checkAdjacentValid(dir[0], dir[1], coords);
-//			//left
-//			checkAdjacentValid(1, 0, coords);
-//			//right
-//			checkAdjacentValid(-1, 0, coords);
-//			//up
-//			checkAdjacentValid(0, 1, coords);
-//			//down
-//			checkAdjacentValid(0, -1, coords);
 		}
 	}
 
@@ -125,11 +122,13 @@ public abstract class Game {
 	}
 
 	// Gets cell name for make a move in a moving or flying state
-	public Cell movingOrFlying(){
-		Cell cell;
-		cell = (this.turnPlayer.getPlayersGamestate() == GameState.MOVING) ? Cell.MOVEVALID : Cell.EMPTY;
-		return cell;
-	}
+	public boolean movingOrFlying(int row, int col){
+        if (Objects.requireNonNull(this.turnPlayer.getPlayersGamestate()) == GameState.FLYING) {
+            if (this.getCell(row, col) == Cell.EMPTY)
+                return true;
+        }
+        return this.getCell(row, col) == Cell.MOVEVALID;
+    }
 
 	// Checks to see if Opponent has any pieces not in mills before letting the player remove a piece in a mill
 	public boolean getOppFreePieces(){
@@ -160,7 +159,7 @@ public abstract class Game {
 		return cells;
 	}
 	// Updated the game spaces to check for adjacent game spaces
-	public void clearMoveValids(){
+	public void clearMoveValid(){
 		for (int row = 0; row < this.size; ++row)
 			for (int col = 0; col < this.size; ++col)
 				if(getCell(row, col) == Cell.MOVEVALID)
@@ -173,10 +172,15 @@ public abstract class Game {
 	private void updateGameState(){
 		updateGameStatePerPlayer(redPlayer);
 		updateGameStatePerPlayer(bluePlayer);
-	};
+	}
 
 	// changes turn to next player and updates
 	public void changeTurn() {
+		if (this.isEndingGame()) {
+			deleteGame();
+			this.deletedGame=true;
+			return; // Exit early if the game has ended
+		}
 		this.turnPlayer = (this.turnPlayer.getColor() == 'R') ? this.bluePlayer : this.redPlayer;
 		this.opponentPlayer = (this.opponentPlayer.getColor() == 'B') ? this.redPlayer : this.bluePlayer;
 
@@ -186,8 +190,6 @@ public abstract class Game {
 			gui.changeTurnPlayerPanel();
 			gui.updateGameStatus();
 		}
-		System.out.println("redPlayer: " + redPlayer.getPlayersGamestate());
-		System.out.println("bluePlayer: " + bluePlayer.getPlayersGamestate());
 
 		this.checkForGameOver();
 		this.letCPUMove();
@@ -221,24 +223,40 @@ public abstract class Game {
 	}
 
 	// check to see if the game has ended
-	private void checkForGameOver() {
-		GameState state;
-		if(this.turnPlayer.getPlayersGamestate() == GameState.MOVING || this.turnPlayer.getPlayersGamestate() == GameState.FLYING) {
-			if (this.turnPlayer.numberOfBoardPieces() < 3 || !this.turnPlayer.canPiecesMove()) {
-				gameOver();
+	public void checkForGameOver() {
+		GameState state = this.turnPlayer.getPlayersGamestate();
+		if(state == GameState.MOVING || state == GameState.FLYING) {
+			if (this.turnPlayer.totalNumberOfPieces() < 3 || !this.turnPlayer.canPiecesMove()) {
+				gameOver(GameState.GAMEOVER);
+			}
+			else if (this.turnPlayer.totalNumberOfPieces()==3
+					&& this.opponentPlayer.totalNumberOfPieces()==3
+				    && !this.turnPlayer.canWinThisTurn()
+			){
+				System.out.println(this.turnPlayer.getColor());
+				System.out.println("draw");
+				gameOver(GameState.DRAW);
 			}
 		}
 	}
 
-	private void gameOver(){
-		this.turnPlayer.setPlayersGamestate(GameState.GAMEOVER);
-		this.opponentPlayer.setPlayersGamestate(GameState.GAMEOVER);
-		if (this.turnPlayer.getColor() == 'R') {
-			System.out.println("Blue player won");
+	private void gameOver(GameState state){
+		this.turnPlayer.setPlayersGamestate(state);
+		this.opponentPlayer.setPlayersGamestate(state);
+		if(gui!=null){
+			switch (state){
+				case GAMEOVER -> gui.animateGameOver(this.turnPlayer.getBoardPiecesCoords());
+				case DRAW -> gui.tiedGame();
+			}
 		} else {
-			System.out.println("Red player won");
+			System.out.println(switch (state){
+				case GAMEOVER -> ((this.turnPlayer.getColor() == 'R') ? "Blue":"Red")+" player won!";
+				case DRAW -> "Game is a Draw";
+				default -> "";
+			});
 		}
-		gui.animateGameOver(this.turnPlayer.getBoardPiecesCoords());
+		System.out.println(grid[4][3]);
+		gameHistory.writeMoves();
 	}
 
 
@@ -249,37 +267,35 @@ public abstract class Game {
 
 	// check to see if a mill was formed before changing turns
 	public void checkMill(int row, int col) {
-		CheckMill millChecker = new CheckMill(this.getGrid());
-		Set<int[]> millMates = new HashSet<>();
-		List<int[]> sortedMillMates;
-		if(millChecker.checkMillAllDirections(row, col)){
-			millMates.add(new int[]{row,col});
-			millMates.addAll(millChecker.getMillMates(row, col));
-			sortedMillMates = millChecker.sortMillMatesBySharedPosition(millMates);
+			CheckMill millChecker = new CheckMill(this.getGrid());
+			Set<int[]> millMates = new HashSet<>();
+			List<int[]> sortedMillMates;
+			if (millChecker.checkMillAllDirections(row, col)) {
+				millMates.add(new int[]{row, col});
+				millMates.addAll(millChecker.getMillMates(row, col));
+				sortedMillMates = millChecker.sortMillMatesBySharedPosition(millMates);
 
-			if (gui!=null) {
-				gui.animateMillForm(() -> {
-					// don't change the turn if the player has formed the mill
-					// switch to mill state after animation plays
+				if (gui != null) {
+					gui.animateMillForm(() -> {
+						// don't change the turn if the player has formed the mill
+						// switch to mill state after animation plays
+						this.turnPlayer.setPlayersGamestate(GameState.MILLING);
+						gui.updateGameStatus();
+						this.letCPUMove();
+					}, sortedMillMates);
+				} else {
 					this.turnPlayer.setPlayersGamestate(GameState.MILLING);
-					gui.updateGameStatus();
 					this.letCPUMove();
-				}, sortedMillMates);
+				}
 			} else {
-				this.turnPlayer.setPlayersGamestate(GameState.MILLING);
-				this.letCPUMove();
+				this.changeTurn();
 			}
-		}
-		else{
-			this.changeTurn();
-		}
 	}
 
 	// returns a list of cell coords with a given cellType
 	public List<int[]> getCellsByCellType(Cell cellType){
 		Cell[][] grid = this.getGrid();
 		List<int[]> cells = new ArrayList<>();
-
 		for (int row = 0; row < this.size; row++) {
 			for (int col = 0; col < this.size; col++) {
 				if (grid[row][col] == cellType) {
@@ -294,7 +310,39 @@ public abstract class Game {
         return gameHistory;
     }
 
-    public void setGameHistory(GameHistory gameHistory) {
-        this.gameHistory = gameHistory;
-    }
+	public void endGame() {
+		this.endingGame=true;
+	}
+	private void deleteGame(){
+		// Perform cleanup of resources
+		this.grid = null;           // Release the grid
+		this.redPlayer = null;      // Release player references
+		this.bluePlayer = null;
+		this.turnPlayer = null;
+		this.opponentPlayer = null;
+		this.gui = null;            // Release GUI reference
+		this.gameHistory = null;    // Release game history
+
+		System.out.println("Game resources have been cleaned up. Exiting the game...");
+		System.out.println("Game has ended.");
+
+		// Suggest garbage collection
+		System.gc();
+	}
+
+	private boolean isEndingGame() {
+		return endingGame;
+	}
+
+	public boolean isDeletedGame() {
+		return deletedGame;
+	}
+
+	// make a temp grid to test outcome of a possible move
+	public Cell[][] makeTempGrid(){
+		Cell[][] grid = this.getGrid();
+		return Arrays.stream(grid)
+				.map(Cell[]::clone)
+				.toArray(Cell[][]::new);
+	}
 }

@@ -20,15 +20,21 @@ public class TestFlyPiece {
 		board.setRedPlayer(new HumanPlayer('R', board));
 		board.setBluePlayer(new HumanPlayer('B', board));
 
-		board.getRedPlayer().setGamePiecesForFlying();
-		board.getBluePlayer().setGamePiecesForFlying();
+		board.getRedPlayer().setGamePiecesTo(4);
+		board.getBluePlayer().setGamePiecesTo(4);
 
 		board.getTurnPlayer().placePiece(0, 0); //red
 		board.getTurnPlayer().placePiece(1, 1); //blue
-		board.getTurnPlayer().placePiece(2, 2); //red
+		board.getTurnPlayer().placePiece(0, 3); //red
 		board.getTurnPlayer().placePiece(4, 4); //blue
-		board.getTurnPlayer().placePiece(5, 5); //red
+		board.getTurnPlayer().placePiece(0, 6); //red
+
+		board.getTurnPlayer().removePiece(1,1); // remove blue
+
 		board.getTurnPlayer().placePiece(6, 6); //blue
+		board.getTurnPlayer().placePiece(2, 2); //red
+		board.getTurnPlayer().placePiece(1, 1); //blue
+		board.getTurnPlayer().movePiece(3, 0, 0, 0); //move red
 	}
 
 	@After
@@ -39,11 +45,11 @@ public class TestFlyPiece {
 	@Test
 	public void testFlyPieceToEmptyCell() {
 		assertEquals("", board.getTurnPlayer().getPlayersGamestate(), GameState.FLYING);
-		board.getTurnPlayer().movePiece(3, 0, 0, 0);
-		assertEquals("", board.getCell(3, 0), Cell.RED);
-		Cell cell = board.getCell(0, 0);
+		board.getTurnPlayer().movePiece(1, 3, 1, 1);
+		assertEquals("", board.getCell(1, 3), Cell.BLUE);
+		Cell cell = board.getCell(1, 1);
 		assertTrue("",cell == Cell.EMPTY || cell == Cell.MOVEVALID);
-		assertEquals("", board.getTurnPlayer().getColor(), 'B');
+		assertEquals("", board.getTurnPlayer().getColor(), 'R');
 	}
 
 	// acceptance criterion 5.2
@@ -52,12 +58,12 @@ public class TestFlyPiece {
 		Cell beforeMove;
 		assertEquals("", board.getTurnPlayer().getPlayersGamestate(), GameState.FLYING);
 
-		beforeMove = board.getCell(1, 1);
+		beforeMove = board.getCell(0, 3);
 
-		board.getTurnPlayer().movePiece(1, 1, 0, 0);
+		board.getTurnPlayer().movePiece(0, 3, 1, 1);
 
-		assertSame(board.getCell(1, 1), beforeMove);
-		assertEquals("", board.getCell(0, 0), Cell.RED);
-		assertEquals("", board.getTurnPlayer().getColor(), 'R');
+		assertSame(board.getCell(0, 3), beforeMove);
+		assertEquals("", board.getCell(1, 1), Cell.BLUE);
+		assertEquals("", board.getTurnPlayer().getColor(), 'B');
 	}
 }

@@ -6,9 +6,10 @@ public class NineMMGame extends Game {
 
 	private static final int pieces = 9;
 	private static final int size = 7;
+	private static final GameMode gameMode = GameMode.NINE;
 
 	public NineMMGame() {
-		super(pieces, size);
+		super(pieces, size, gameMode);
 	}
 
 	@Override
@@ -17,8 +18,9 @@ public class NineMMGame extends Game {
 			player.setPlayersGamestate(GameState.PLACING);
 		if (player.numberOfGamePieces() <= 0 )
 			player.setPlayersGamestate(GameState.MOVING);
-		if (player.totalNumberOfPieces() <= 3) {
+		if (player.totalNumberOfPieces() <= 3 && player.numberOfGamePieces()==0) {
 			player.setPlayersGamestate(GameState.FLYING);
+			player.setGamePiecesToFlying();
 		}
 	}
 }

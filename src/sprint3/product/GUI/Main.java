@@ -1,5 +1,6 @@
 package sprint3.product.GUI;
 
+import com.google.gson.JsonArray;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -14,6 +15,8 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
 import javafx.util.Duration;
+import sprint3.product.Game.GameHistory;
+import sprint3.product.Game.GameMode;
 
 import java.io.File;
 
@@ -93,7 +96,7 @@ public class Main extends Application {
 
     // Helper method to set the background image
     private void setBackgroundImage(Pane layout) {
-        File imageFile = new File("x_mens_morris/src/nmmBg.jpg"); // Image located in the root directory
+        File imageFile = new File("src/nmmBg.jpg"); // Image located in the root directory
         if (imageFile.exists()) {      Image image = new Image(imageFile.toURI().toString());
             BackgroundImage backgroundImage = new BackgroundImage(image,
                     BackgroundRepeat.NO_REPEAT,   // No repeat horizontally
@@ -113,8 +116,17 @@ public class Main extends Application {
     }
 
     // Dummy action for viewing replay
-    private void viewReplay() {
-        System.out.println("Viewing last game replay...");
+    public void viewReplay() {
+        GameHistory gameHistory = new GameHistory();
+
+        GameMode gridSelection = gameHistory.getReplayGameMode();
+        JsonArray moveArray = gameHistory.getReplayPiecesArray();
+
+        if (gridSelection!=null) {
+            System.out.println("Viewing last game replay...");
+            Board gui = new Board(gridSelection, moveArray, this);
+            gui.start(primaryStage);
+        }
     }
 
     // Helper method to create buttons with shadow and hover effect
