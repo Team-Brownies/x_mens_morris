@@ -6,8 +6,6 @@ import sprint3.product.GUI.Board;
 import sprint3.product.Game.Game;
 import sprint3.product.Game.GameState;
 
-import java.util.Deque;
-
 public class ScriptedPlayer extends Player{
     private JsonArray moves;
     private int turnNumber = 0;

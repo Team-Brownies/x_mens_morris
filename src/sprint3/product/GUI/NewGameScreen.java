@@ -160,10 +160,12 @@ public class NewGameScreen {
 
     // Action for playing the game
     private void playGame() {
+        PlayerType redType = (redSelecter.isSwitchedOn()) ? PlayerType.CPU : PlayerType.HUMAN;
+        PlayerType blueType = (blueSelecter.isSwitchedOn()) ? PlayerType.CPU : PlayerType.HUMAN;
         System.out.println("Starting the game...");
         Board gui = new Board(gridSelection,
-                redSelecter.isSwitchedOn(),
-                blueSelecter.isSwitchedOn(),
+                redType,
+                blueType,
                 redSelecter.getDifficultyValue(),
                 blueSelecter.getDifficultyValue(),
                 this

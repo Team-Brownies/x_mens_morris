@@ -30,8 +30,8 @@ public class Board extends Application {
 	private final double sceneSize = 450;
 	private final GameMode gameType;
 	private final boolean isReplay;
-	private final boolean isRedCPU;
-	private final boolean isBlueCPU;
+	private final PlayerType redType;
+	private final PlayerType blueType;
 	private final NewGameScreen gameMenu;
 	private final JsonArray moveArray;
 	private final Main replayPage;
@@ -56,8 +56,8 @@ public class Board extends Application {
 
 	public Board(
             GameMode gameType,
-            boolean isRedCPU,
-            boolean isBlueCPU,
+            PlayerType redType,
+			PlayerType blueType,
             int redDifficulty,
             int blueDifficulty,
             NewGameScreen gameMenu
@@ -65,8 +65,8 @@ public class Board extends Application {
 		this.gameType = gameType;
         this.isReplay=false;
 		this.moveArray = null;
-        this.isRedCPU = isRedCPU;
-        this.isBlueCPU = isBlueCPU;
+        this.redType = redType;
+        this.blueType = blueType;
 		this.redDifficulty = redDifficulty;
 		this.blueDifficulty = blueDifficulty;
 		this.gameMenu = gameMenu;
@@ -75,8 +75,8 @@ public class Board extends Application {
 	public Board(GameMode gameType, JsonArray moveArray, Main replayPage) {
         this.gameType = gameType;
 		this.isReplay=true;
-		this.isRedCPU = true;
-		this.isBlueCPU = true;
+		this.redType = PlayerType.SCRIPTED;
+		this.blueType = PlayerType.SCRIPTED;
 		this.gameMenu = null;
 		this.replayPage = replayPage;
 		this.moveArray = moveArray;
@@ -194,8 +194,8 @@ public class Board extends Application {
 			game.setRedPlayer(new ScriptedPlayer('R', game, moveArray, this));
 			game.setBluePlayer(new ScriptedPlayer('B', game, moveArray, this));
 		} else {
-			game.setRedPlayer(isRedCPU ? new CPUPlayer('R', game, this.redDifficulty) : new HumanPlayer('R', game));
-			game.setBluePlayer(isBlueCPU ? new CPUPlayer('B', game, this.blueDifficulty) : new HumanPlayer('B', game));
+			game.setRedPlayer((redType==PlayerType.CPU) ? new CPUPlayer('R', game, this.redDifficulty) : new HumanPlayer('R', game));
+			game.setBluePlayer((blueType==PlayerType.CPU) ? new CPUPlayer('B', game, this.blueDifficulty) : new HumanPlayer('B', game));
 		}
 	}
 
@@ -207,13 +207,12 @@ public class Board extends Application {
 			case SIX:
 				game = new SixMMGame();
 				break;
-
 		}
 	}
 
 	private void setUpPlayerPanels(double playerPaneSize) {
-		redPanel = new PlayerPanel(playerPaneSize, red, blue, game.getRedPlayer());
-		bluePanel = new PlayerPanel(playerPaneSize, blue, red, game.getBluePlayer());
+		redPanel = new PlayerPanel(playerPaneSize, red, blue, game.getRedPlayer(), redType);
+		bluePanel = new PlayerPanel(playerPaneSize, blue, red, game.getBluePlayer(), blueType);
 
 		turnPlayerPanel = redPanel;
 		oppPlayerPanel = bluePanel;

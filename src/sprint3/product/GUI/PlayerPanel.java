@@ -7,7 +7,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.SVGPath;
-import sprint3.product.Game.GameState;
 import sprint3.product.Player.Player;
 
 import java.util.Random;
@@ -22,12 +21,12 @@ public class PlayerPanel extends Pane {
     private Color playerColor;
     private Color oppColor;
     private Player player;
-    private boolean isCPU;
-    private String playerType;
+    private PlayerType playerType;
     private DropShadow turnGlow;
     private Pane glowPane = new Pane();
+    private String playerLabel;
 
-    public PlayerPanel(double playerPaneSize, Color playerColor, Color oppColor, Player player) {
+    public PlayerPanel(double playerPaneSize, Color playerColor, Color oppColor, Player player, PlayerType playerType) {
         this.width = playerPaneSize;
         this.height = playerPaneSize*3;
         this.playerColor = playerColor;
@@ -35,7 +34,7 @@ public class PlayerPanel extends Pane {
         this.player = player;
         this.iconSize = this.width / 3;
         this.gamePieceSize = this.width/10;
-        this.isCPU = player.isCPU();
+        this.playerType = playerType;
 
         setMouseTransparent(true);
 
@@ -80,24 +79,32 @@ public class PlayerPanel extends Pane {
 
     private void addIcon() {
         SVGPath icon = new SVGPath();
-        if (this.isCPU)
-            icon.setContent("M1.5 0A1.5 1.5 0 0 0 0 1.5v7A1.5 1.5 0 0 0 1.5 10H6v1H1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-5v-1h4.5A1.5 1.5 0 0 0 16 8.5v-7A1.5 1.5 0 0 0 14.5 0zm0 1h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-7a.5.5 0 0 1 .5-.5M12 12.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2 0a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M1.5 12h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1M1 14.25a.25.25 0 0 1 .25-.25h5.5a.25.25 0 1 1 0 .5h-5.5a.25.25 0 0 1-.25-.25");
-        else
-            icon.setContent("M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6");
+        double sizeMult = 1;
+        switch (playerType){
+            case HUMAN:
+                icon.setContent("M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6");
+                this.playerLabel = "Human";
+                break;
+            case CPU:
+                icon.setContent("M1.5 0A1.5 1.5 0 0 0 0 1.5v7A1.5 1.5 0 0 0 1.5 10H6v1H1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-5v-1h4.5A1.5 1.5 0 0 0 16 8.5v-7A1.5 1.5 0 0 0 14.5 0zm0 1h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-7a.5.5 0 0 1 .5-.5M12 12.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2 0a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M1.5 12h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1M1 14.25a.25.25 0 0 1 .25-.25h5.5a.25.25 0 1 1 0 .5h-5.5a.25.25 0 0 1-.25-.25");
+                this.playerLabel = "CPU";
+                break;
+            case SCRIPTED:
+                icon.setContent("M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2m5.5 1.5v2a1 1 0 0 0 1 1h2z");
+                this.playerLabel = "Replay";
+                sizeMult=.75;
+                break;
+        }
 
         double iconStartingSize = icon.getBoundsInLocal().getWidth();
-        icon.setScaleX(this.iconSize / iconStartingSize);
-        icon.setScaleY(this.iconSize / iconStartingSize);
+        icon.setScaleX((this.iconSize / iconStartingSize)*sizeMult);
+        icon.setScaleY((this.iconSize / iconStartingSize)*sizeMult);
 
-        // Set the icon's fill color
         icon.setFill(playerColor);
 
-        // Position the icon at the top center
-        double centerX = (this.width - this.iconSize) / 2;
         icon.setLayoutX((this.width - iconStartingSize) / 2);
         icon.setLayoutY(this.iconSize / 2);
 
-        // Set the icon's fill color (optional)
         icon.setFill(playerColor);
         getChildren().add(icon);
     }
@@ -107,19 +114,9 @@ public class PlayerPanel extends Pane {
                 (int) (color.getGreen() * 255),
                 (int) (color.getBlue() * 255));
     }
-//    void updatePlayerStatus(){
-//        GameState state = this.player.getPlayersGamestate();
-//        String stateText = String.valueOf(state);
-//        if (state==GameState.GAMEOVER)
-//            stateText = "";
-//        gameStatus.setText(playerType+"\n"+stateText);
-//        gameStatus.setLayoutX((this.width - gameStatus.getWidth()) / 2);
-//    }
     private void playerStatus(){
         Label gameStatus = new Label("");
-        // Add the Label below the icon
-        playerType = this.isCPU ? "CPU" : "Human";
-        gameStatus.setText(playerType+"\nPlayer");
+        gameStatus.setText(playerLabel+"\nPlayer");
         gameStatus.setLayoutY(this.iconSize + 10);
         gameStatus.setStyle(
                 "-fx-font-size: 14px; " +
@@ -144,11 +141,8 @@ public class PlayerPanel extends Pane {
         int col = 3;
         int row = (int) Math.ceil((double) numberOfGamePieces / col);
         int pieceShift = 10;
-//        double height = this.height / 3;
-//        this.pieceQueue.setPrefSize(this.width, height);
 
         getChildren().add(this.pieceQueue);
-//        this.pieceQueue.setStyle("-fx-background-color: black;");
 
         int pieceLeft = 0;
 
@@ -164,7 +158,6 @@ public class PlayerPanel extends Pane {
             }
         }
         this.pieceQueue.requestLayout();
-//        this.pieceQueue.setStyle("-fx-background-color: black;");
 
         Platform.runLater(() -> {
             double pieceQueueWidth = this.pieceQueue.getWidth();
