@@ -9,7 +9,6 @@ public class CheckMill {
     public CheckMill(Cell[][] grid) {
         this.grid = grid;
         this.middle = (grid[0].length-1)/2;
-
     }
 
     // finds if mill is in a shared row or col (returns 0 for row, 1 for col)

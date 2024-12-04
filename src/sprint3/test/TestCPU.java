@@ -110,7 +110,7 @@ public class TestCPU {
 		assertTrue("",cell == Cell.EMPTY || cell == Cell.MOVEVALID);
 	}
 
-	// acceptance criterion 12.3
+	// acceptance criterion 12.1 (remove)
 	@Test
 	public void testFromRemovePlace() {
 		board.getBluePlayer().setCpu(true);

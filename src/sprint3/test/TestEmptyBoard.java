@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 public class TestEmptyBoard {
 
-	// acceptance criterion 2.1
+	// acceptance criterion 1.1
 	@Test
 	public void testNewNineMensMorrisBoard() {
 		Game game = new NineMMGame();
@@ -38,8 +38,9 @@ public class TestEmptyBoard {
 		assertEquals("", game.getRedPlayer().getGamePieces().size(), 9);
 		assertEquals("", game.getBluePlayer().getGamePieces().size(), 9);
 	}
+	// acceptance criterion 1.2
 	@Test
-	public void testNewFiveMensMorrisBoard() {
+	public void testNewSixMensMorrisBoard() {
 		Game game = new SixMMGame();
 		int size = game.getSize();
 		int middle = (size-1)/2;

@@ -18,7 +18,6 @@ public class ScriptedPlayer extends Player{
         setCpu(true);
         this.moves = moveArray;
         this.board = board;
-//        this.playTo=moveArray.size();
     }
 
     // find what type of move to make based on the game state
@@ -96,19 +95,11 @@ public class ScriptedPlayer extends Player{
         this.playTo = playTo;
     }
 
-    public void togglePlaying() {
-        this.playing = !this.playing;
-    }
-
     public boolean isPlaying() {
         return playing;
     }
 
     public void setPlaying(boolean playing) {
         this.playing = playing;
-    }
-
-    public int getTurnNumber() {
-        return turnNumber;
     }
 }

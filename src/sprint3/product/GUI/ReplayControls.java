@@ -65,4 +65,3 @@ public class ReplayControls extends VBox {
             seekSlider.setValue(turnNumber);
     }
 }
-
