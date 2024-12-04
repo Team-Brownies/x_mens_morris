@@ -93,25 +93,6 @@ public class NewGameScreen {
         gameModeLayout.setAlignment(Pos.CENTER);
         gameModeLayout.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-border-width: 2px; -fx-padding: 10px; -fx-background-radius: 10px;");
 
-
-
-//        redCPUToggle.switchedOnProperty().addListener((observable, oldValue, newValue) -> {
-//            System.out.println("Switched: " + (newValue ? "ON" : "OFF"));
-//        });
-//        blueSelecter.switchedOnProperty().addListener((observable, oldValue, newValue) -> {
-//            System.out.println("Switched: " + (newValue ? "ON" : "OFF"));
-//        });
-
-//        redCPU = createOptionButton("P1 vs P2");
-//        redCPU.setOnAction(e -> chooseGameMode("P1 vs P2"));
-//        gameModeButtonP1vsPC = createOptionButton("P1 vs PC");
-//        gameModeButtonP1vsPC.setOnAction(e -> chooseGameMode("P1 vs PC"));
-
-        // Set default selection for P1 vs P2
-//        selectedGameModeButton = redCPUToggle;
-//        redCPUToggle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-background-color: black; -fx-text-fill: white; -fx-padding: 10px 20px; -fx-border-color: white; -fx-border-width: 2px;");
-
-//        gameModeLayout.getChildren().addAll(gameModeTitle, redCPUToggle, blueSelecter);
         gameModeLayout.getChildren().addAll(redSelecter, blueSelecter);
 
         // Create a container for the Play button

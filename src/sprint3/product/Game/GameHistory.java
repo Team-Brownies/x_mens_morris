@@ -57,56 +57,9 @@ public class GameHistory {
     public void logMove(String id, int row, int col) {
         String moveLog = "{\"Piece\": \""+id+"\", \"Row\": " + row + ", \"Col\": " + col+"}";
         moveList.add(moveLog);
-//        gameHistory.push(moveLog);
-//
-//        try {
-//            gameLogWriter.write(moveLog);
-//            gameLogWriter.newLine();
-//            gameLogWriter.flush();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 
-    // Undo the last move (example implementation)
-//    public boolean undoMove(Game game) {
-//        if (!gameHistory.isEmpty()) {
-//            String lastMove = gameHistory.pop();
-//            String[] moveParts = lastMove.split(", ");
-//            int row = Integer.parseInt(moveParts[0].split(": ")[1]);
-//            int col = Integer.parseInt(moveParts[1].split(": ")[1]);
-//            String stateStr = moveParts[2].split(": ")[1];
-//            char playerTurn = moveParts[3].split(": ")[1].charAt(0);
-//
-//            switch (stateStr) {
-//                case "PLACING":
-//                    // Undo placing a piece (example logic)
-//                    System.out.println("Undoing PLACING at Row: " + row + ", Col: " + col);
-//                    board.deletePiece(row, col); // Call a method on Board to delete the piece
-//                    break;
-//                case "MOVING":
-//                case "FLYING":
-//                    // Undo moving or flying
-//                    System.out.println("Undoing MOVING/FLYING");
-//                    board.updateCells();  // Refresh the board
-//                    board.updateGameStatus();  // Update the game status
-//                    break;
-//                case "MILLING":
-//                    System.out.println("Undoing MILLING");
-//                    break;
-//                default:
-//                    System.out.println("Unknown game state: " + stateStr);
-//                    return false;
-//            }
-//
-//            return true;
-//        }
-//
-//        System.out.println("No moves to undo.");
-//        return false;
-//    }
-
-    private void writeMoves(){
+    public void writeMoves(){
         try{
             gameLogWriter.write("\"Pieces\": [\n");
 
@@ -121,15 +74,15 @@ public class GameHistory {
             gameLogWriter.write("]\n");
             gameLogWriter.write("}\n");
             gameLogWriter.flush();
+            this.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     // Close the log writer when done
-    public void close() {
+    private void close() {
         try {
             if (gameLogWriter != null) {
-                writeMoves();
                 Files.copy(Paths.get(TMP_FILE_PATH), Paths.get(LOG_FILE_PATH), StandardCopyOption.REPLACE_EXISTING);
                 System.out.println("File copied successfully!");
                 gameLogWriter.close();
@@ -145,9 +98,6 @@ public class GameHistory {
             String gameMode = jsonObject.get("GameMode").getAsString();
             this.replayGameMode = (Objects.equals(gameMode, "NINE")) ? GameMode.NINE : GameMode.SIX;
             this.replayPiecesArray = jsonObject.getAsJsonArray("Pieces");
-
-            System.out.println("GameMode: " + gameMode);
-            System.out.println("Pieces: " + replayPiecesArray.toString());
 
         } catch (IOException e) {
             e.printStackTrace();

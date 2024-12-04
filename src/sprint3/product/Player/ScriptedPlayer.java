@@ -12,7 +12,7 @@ public class ScriptedPlayer extends Player{
     private JsonArray moves;
     private int turnNumber = 0;
     private boolean playing = true;
-    private int playTo =10;
+    private int playTo;
     private final Board board;
 
     public ScriptedPlayer(char color, Game game, JsonArray moveArray, Board board) {
@@ -20,20 +20,7 @@ public class ScriptedPlayer extends Player{
         setCpu(true);
         this.moves = moveArray;
         this.board = board;
-        this.playTo=moveArray.size();
-    }
-
-    private void setMove(JsonArray moveArray) {
-        for (int i = 0; i < moveArray.size(); i++) {
-            JsonObject pieceObject = moveArray.get(i).getAsJsonObject();
-            String piece = pieceObject.get("Piece").getAsString();
-            String color = String.valueOf(this.getColor());
-            if (piece.startsWith(color)) {
-                moves.add(pieceObject);
-            }
-        }
-        System.out.println("Pieces: " + moves.toString());
-
+//        this.playTo=moveArray.size();
     }
 
     // find what type of move to make based on the game state
@@ -44,7 +31,9 @@ public class ScriptedPlayer extends Player{
         if((turnNumber>this.playTo)){
             board.restartReplay();
         }
-        while (!moved && playing && (turnNumber<this.playTo)) {
+        while (!moved && playing && turnNumber<=this.playTo) {
+            if (turnNumber==this.playTo)
+                board.setAnimationSpeed(1);
             switch (gameState) {
                 case PLACING:
                     if (playerMove(turnNumber)) {
@@ -94,15 +83,15 @@ public class ScriptedPlayer extends Player{
         String gp = piece.get("Piece").getAsString();
 
         int[] coords = getGame().getOpponentPlayer().getGamePieceCoordsById(gp);
-        System.out.println(piece.getAsJsonObject().toString());
         removePiece(coords[0],coords[1]);
     }
     private boolean playerMove(int i){
-        JsonObject pieceObject = moves.get(i).getAsJsonObject();
-        String piece = pieceObject.get("Piece").getAsString();
-        int row = pieceObject.get("Row").getAsInt();
+        JsonObject piece = moves.get(i).getAsJsonObject();
+
+        String gp = piece.get("Piece").getAsString();
+        int row = piece.get("Row").getAsInt();
         String color = String.valueOf(this.getColor());
-        return piece.startsWith(color) && row!=-1;
+        return gp.startsWith(color) && row!=-1;
     }
 
     public void setPlayTo(int playTo) {
@@ -111,6 +100,10 @@ public class ScriptedPlayer extends Player{
 
     public void togglePlaying() {
         this.playing = !this.playing;
+    }
+
+    public boolean isPlaying() {
+        return playing;
     }
 
     public void setPlaying(boolean playing) {

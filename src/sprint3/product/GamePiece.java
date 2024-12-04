@@ -32,19 +32,9 @@ public class GamePiece {
         gameHistory.logMove(this.id, row, col);
     }
 
-    // set the coords (with an array) of this game piece
-    public void setLocation(int[] location) {
-        setLocation(location[0], location[1]);
-    }
-
     // get the coord of this game piece
     public int[] getLocation() {
         return location;
-    }
-
-    // get id a game piece
-    public String getId() {
-        return id;
     }
 
     // is this game piece in play or have it been milled
@@ -66,12 +56,6 @@ public class GamePiece {
         this.updateValidMovesLocations();
     }
 
-    // prints the location of game piece
-    public void printLocation(){
-        if (this.inPlay)
-            System.out.println("ID: "+id+" ("+ this.location[0]+", "+this.location[1]+")");
-    }
-
     // return list of space the game piece is able to move to
     public List<int[]> getValidMovesLocations() {
         return validMovesLocations;
@@ -81,7 +65,6 @@ public class GamePiece {
     // for with it searches for a Valid Moves Locations
     public void setCellStateForFlying() {
         this.cellState.add(Cell.EMPTY);
-//        updateValidMovesLocations();
     }
 
     // update list of Valid Moves Locations
@@ -109,15 +92,7 @@ public class GamePiece {
         this.validMovesLocations.clear();
     }
 
-    // prints list of Valid Moves Locations
-    public void printValidMoves() {
-        for (int[] move:validMovesLocations){
-            System.out.println("("+move[0]+", "+move[1]+")");
-        }
-    }
-
     public boolean getPieceById(String id) {
-        System.out.println(this.id+" "+id);
         return Objects.equals(this.id, id);
     }
 }

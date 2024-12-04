@@ -72,7 +72,6 @@ public class CPUPlayer extends Player{
         }
 
         randomMove =possibleMoves.get(getRandom(possibleMoves.size()));
-        System.out.println("mill: "+ Arrays.toString(millMove) +" block: "+ Arrays.toString(blockMove) +" random: "+ Arrays.toString(randomMove));
         return getMoveBaseOnDifficulty(millMove, blockMove, randomMove);
     }
 
@@ -97,8 +96,6 @@ public class CPUPlayer extends Player{
         piecesMoves = randomPiece.getValidMovesLocations();
         randomPiecesMove = piecesMoves.get(getRandom(piecesMoves.size()));
         randomMove = new int[][]{randomPiece.getLocation(), randomPiecesMove};
-
-        System.out.println("mill: "+ Arrays.deepToString(millMove) +" block: "+ Arrays.deepToString(blockMove) +" random: "+ Arrays.deepToString(randomMove));
 
         return getMoveBaseOnDifficulty(millMove, blockMove, randomMove);
     }
@@ -174,7 +171,6 @@ public class CPUPlayer extends Player{
     private int[] getRemovePieceForMoving(){
         int[][] possibleMillMove = findMillOrBlock(this.game.getOpponentPlayer(), "Mill");
 
-        System.out.println(Arrays.toString(getMillMatesForRemove(possibleMillMove)));
         return getMillMatesForRemove(possibleMillMove);
     }
     // handle to convect to 2d array
@@ -190,8 +186,6 @@ public class CPUPlayer extends Player{
         Set<int[]> millMates = new HashSet<>();
         Cell oppTag = this.getOpponentTag();
 
-        System.out.println(Arrays.deepToString(possibleMillMove));
-
         if (possibleMillMove!=null && possibleMillMove[0]!=null){
             // set up for moving to form mill
             if (possibleMillMove.length>1) {
@@ -201,7 +195,6 @@ public class CPUPlayer extends Player{
             }
             // set up for placing to form mill
             else {
-                System.out.println(possibleMillMove[0][0]+" "+possibleMillMove[0][1]);
                 tempGrid[possibleMillMove[0][0]][possibleMillMove[0][1]] = oppTag;
                 millMates.addAll(testMillChecker.getMillMates(possibleMillMove[0][0], possibleMillMove[0][1]));
             }

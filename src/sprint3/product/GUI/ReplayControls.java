@@ -4,65 +4,65 @@ import com.google.gson.JsonArray;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import sprint3.product.Game.Game;
 import sprint3.product.Player.ScriptedPlayer;
 
 public class ReplayControls extends VBox {
         private Slider seekSlider;
-        private int turn;
 
-        public ReplayControls(JsonArray log, Game game) {
+        public ReplayControls(JsonArray log, double size, Board board) {
+            Game game = board.getGame();
             ScriptedPlayer red = (ScriptedPlayer) game.getRedPlayer();
             ScriptedPlayer blue = (ScriptedPlayer) game.getBluePlayer();
+            red.setPlayTo(log.size());
+            blue.setPlayTo(log.size());
+
             seekSlider = new Slider();
             seekSlider.setMin(0);
             seekSlider.setMax(log.size());
-            seekSlider.setBlockIncrement(1);
-            seekSlider.setMajorTickUnit(10);
-            seekSlider.setMinorTickCount(5);
-            seekSlider.setShowTickMarks(true);
-            seekSlider.setShowTickLabels(true);
+            seekSlider.setDisable(true);
+            seekSlider.setStyle("-fx-opacity: 1.0;");
 
-
-            seekSlider.valueProperty().addListener((_, _, newValue) -> {
-                double value = (double) newValue;
-                int roundedValue = (int) Math.round(value);
-//                seekSlider.setValue(roundedValue);
-//
-//                red.setPlayTo(roundedValue);
-//                blue.setPlayTo(roundedValue);
-//                game.letCPUMove();
-            });
-
-            Button playButton = new Button("Play");
-            Button prevButton = new Button("Prev Step");
+            Button playButton = new Button("Pause");
             Button nextButton = new Button("Next Step");
 
+            playButton.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Arial';");
+            nextButton.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Arial';");
+
             playButton.setOnAction(e -> {
-                red.togglePlaying();
-                blue.togglePlaying();
+                boolean isPlaying = red.isPlaying();
+
+                playButton.setText(isPlaying ? "Play" : "Pause");
+                red.setPlaying(!isPlaying);
+                blue.setPlaying(!isPlaying);
                 game.letCPUMove();
             });
 
-            prevButton.setOnAction(e -> {
-                seekSlider.setValue(seekSlider.getValue()-1);
-//                red.setPlayTo(turn);
-//                blue.setPlayTo(turn);
-            });
-
             nextButton.setOnAction(e -> {
-                seekSlider.setValue(seekSlider.getValue()+1);
-//                red.setPlayTo(turn);
-//                blue.setPlayTo(turn);
+                boolean isAnimateRunning = board.isRunningAnimation();
+                if (!red.isPlaying()&&!isAnimateRunning) {
+                    red.setPlaying(true);
+                    blue.setPlaying(true);
+                    game.letCPUMove();
+                }
+                red.setPlaying(false);
+                blue.setPlaying(false);
             });
 
-            HBox buttonBox = new HBox(10, prevButton, playButton, nextButton);
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            HBox buttonBox = new HBox(20, playButton, spacer, nextButton);
             getChildren().addAll(seekSlider, buttonBox);
+            this.setMinWidth(size);
+            this.setSpacing(20);
         }
 
     public void setSeek(int turnNumber) {
-//            seekSlider.setValue(turnNumber);
+            seekSlider.setValue(turnNumber);
     }
 }
 

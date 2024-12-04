@@ -48,11 +48,11 @@ public class Board extends Application {
 
 	private GameSpace movingGamePiece;
 	private boolean runningAnimation;
+	private double animationSpeed = 1;
 	private Label gameStatus = new Label("");
 	private int redDifficulty;
 	private int blueDifficulty;
 	private ReplayControls replayControls;
-	private boolean animateOff;
 
 	public Board(
             GameMode gameType,
@@ -109,6 +109,9 @@ public class Board extends Application {
 					gamePane.add(gameSpaces[row][col] = new GameSpace(row, col, false, this), col, row);
 				}
 
+		Button speedButton = new Button("Speed Up ");
+		speedButton.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Arial';");
+		speedButton.setOnAction(e -> speedToggle(speedButton));
 		// Exit button
 		Button exitButton = new Button("Exit");
 		exitButton.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Arial';");
@@ -132,13 +135,20 @@ public class Board extends Application {
 						"-fx-alignment: center;" +
 						"-fx-background-color: lightgrey;"
 		);
+		optionsLayout.getChildren().add(speedButton);
+
+		if(isReplay)
+			addReplayControls(optionsLayout, sceneSize-(optionsLayout.getSpacing()*2));
+		else {
+			Region spacer = new Region();
+			HBox.setHgrow(spacer, Priority.ALWAYS);
+			optionsLayout.getChildren().add(spacer);
+		}
+
 		optionsLayout.getChildren().add(restartButton);
 
 		// Add exit button to the left
 		optionsLayout.getChildren().add(exitButton);
-
-		// Add the undo button to the right
-		optionsLayout.getChildren().add(createRedoButton());
 
 		BorderPane mainPane = new BorderPane();
 
@@ -147,9 +157,6 @@ public class Board extends Application {
 		mainPane.setRight(bluePanel);
 		mainPane.setTop(optionsLayout);
 		mainPane.setBottom(gameStatus);
-
-		if(isReplay)
-			addReplayControls(optionsLayout);
 
 		optionsLayout.setMinHeight(50);
 		gameStatus.setMinHeight(50);
@@ -164,10 +171,18 @@ public class Board extends Application {
 		updateGameStatus();
 	}
 
-	private void addReplayControls(HBox optionsLayout) {
-		assert moveArray != null;
-		this.replayControls = new ReplayControls(moveArray, game);
-		optionsLayout.getChildren().add(replayControls);
+	private void speedToggle(Button speedButton) {
+		boolean speed = animationSpeed==1;
+		this.animationSpeed = speed ? 0.5 : 1;
+		speedButton.setText(speed ? "Slow Down" : "Speed Up");
+	}
+
+	private void addReplayControls(HBox optionsLayout, double size) {
+		Region spacer = new Region();
+		this.replayControls = new ReplayControls(moveArray, size, this);
+
+		HBox.setHgrow(spacer, Priority.ALWAYS);
+		optionsLayout.getChildren().addAll(spacer, replayControls);
 	}
 
 	public void setReplaySeekSlider(int turnNumber) {
@@ -176,11 +191,9 @@ public class Board extends Application {
 
 	private void setPlayers() {
 		if (isReplay){
-			animateOff = true;
 			game.setRedPlayer(new ScriptedPlayer('R', game, moveArray, this));
 			game.setBluePlayer(new ScriptedPlayer('B', game, moveArray, this));
 		} else {
-			animateOff = false;
 			game.setRedPlayer(isRedCPU ? new CPUPlayer('R', game, this.redDifficulty) : new HumanPlayer('R', game));
 			game.setBluePlayer(isBlueCPU ? new CPUPlayer('B', game, this.blueDifficulty) : new HumanPlayer('B', game));
 		}
@@ -300,32 +313,9 @@ public class Board extends Application {
 		movingGamePiece = null;
 
 
-
 		System.out.println("Board resources have been cleaned up. Exiting the game...");
 		System.out.println("Board has ended.");
 	}
-
-	//undo for undoButton
-	private void undoAction() {
-		// Retrieve the last move from the history
-//		gameHistory.undoMove(game);
-	}
-
-	// Helper method to create the Undo button
-	private Button createRedoButton() {
-		// Create a new button
-		Button redoButton = new Button("Undo");
-
-		redoButton.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Arial';");
-
-		redoButton.setOnAction(e -> {
-			System.out.println("Redo action triggered");
-			undoAction();
-		});
-
-		return redoButton;
-	}
-
 
 	// clear highlights on all points
     public void clearHighlights(){
@@ -347,14 +337,6 @@ public class Board extends Application {
 			}
 		}
 	}
-	// highlights all empty Game Spaces for moving game piece
-	private void highlightForFlying(){
-		GameSpace movingGP = this.getMovingGamePiece();
-		for (int row = 0; row < this.getGameSize(); row++)
-			for (int col = 0; col < this.getGameSize(); col++)
-				if (game.movingOrFlying(row, col) && movingGP != null)
-					this.getGameSpace(row, col).setPointGlow(Color.GREEN.brighter());
-	}
 	// run animation each piece in the mill
 	private SequentialTransition animateEachMillPiece(Point3D axis, List<int[]> sortedMillMates){
 		GameSpace gameSpace;
@@ -366,14 +348,14 @@ public class Board extends Application {
 			gameSpace.toFront();
 			animateGP.toFront();
 
-			ScaleTransition growTransition = new ScaleTransition(Duration.millis(250), animateGP);
+			ScaleTransition growTransition = new ScaleTransition(Duration.millis(250*animationSpeed), animateGP);
 			growTransition.setFromY(1.0);
 			growTransition.setFromX(1.0);
 			growTransition.setToY(2.0);
 			growTransition.setToX(2.0);
 			growTransition.setInterpolator(Interpolator.EASE_OUT);
 
-			ScaleTransition shrinkTransition = new ScaleTransition(Duration.millis(250), animateGP);
+			ScaleTransition shrinkTransition = new ScaleTransition(Duration.millis(250*animationSpeed), animateGP);
 			shrinkTransition.setFromY(2.0);
 			shrinkTransition.setFromX(2.0);
 			shrinkTransition.setToY(1.0);
@@ -381,12 +363,11 @@ public class Board extends Application {
 			shrinkTransition.setInterpolator(Interpolator.EASE_IN);
 
 			// Create a flipping transition
-			RotateTransition flipTransition = new RotateTransition(Duration.millis(500), animateGP);
+			RotateTransition flipTransition = new RotateTransition(Duration.millis(500*animationSpeed), animateGP);
 			flipTransition.setAxis(axis);
 			flipTransition.setFromAngle(0);
 			flipTransition.setToAngle(360);  // Full rotation for a coin flip effect
 			flipTransition.setInterpolator(Interpolator.EASE_BOTH);
-
 
 			// Add pause and parallel transitions into a sequential transition to start with a pause
 			SequentialTransition scaleTransition = new SequentialTransition(growTransition, shrinkTransition);
@@ -401,12 +382,6 @@ public class Board extends Application {
 	}
 	// run animation for when a mill is formed
 	public void animateMillForm(Runnable onFinished, List<int[]> millMates) {
-		if(animateOff){
-			if (onFinished != null) {
-				onFinished.run();
-			}
-			return;
-		}
 		CheckMill millChecker = new CheckMill(game.getGrid());
 
 		int inCommonIndex = millChecker.findCommonIndex(millMates);
@@ -448,7 +423,7 @@ public class Board extends Application {
 			Color loserColor = (Color) gamePiece.getFill();
 
 			// Wobble effect
-			ScaleTransition wobble = new ScaleTransition(Duration.millis(50), gamePiece);
+			ScaleTransition wobble = new ScaleTransition(Duration.millis(50*animationSpeed), gamePiece);
 			wobble.setFromX(1.0);
 			wobble.setFromY(1.0);
 			wobble.setToX(1.2);
@@ -457,21 +432,21 @@ public class Board extends Application {
 			wobble.setAutoReverse(true);
 
 			// Color pulsing effect
-			FillTransition colorTransition = new FillTransition(Duration.millis(100), gamePiece);
+			FillTransition colorTransition = new FillTransition(Duration.millis(100*animationSpeed), gamePiece);
 			colorTransition.setFromValue(loserColor);
 			colorTransition.setToValue(loserColor.darker());
 			colorTransition.setCycleCount(5);
 			colorTransition.setAutoReverse(true);
 			
 			// Grow effect
-			ScaleTransition grow = new ScaleTransition(Duration.millis(500), gamePiece);
+			ScaleTransition grow = new ScaleTransition(Duration.millis(500*animationSpeed), gamePiece);
 			grow.setFromX(1.0);
 			grow.setFromY(1.0);
 			grow.setToX(1.5);
 			grow.setToY(1.5);
 
 			// Fade Transition
-			FadeTransition fadeTransition = new FadeTransition(Duration.millis(500), gamePiece);
+			FadeTransition fadeTransition = new FadeTransition(Duration.millis(500*animationSpeed), gamePiece);
 			fadeTransition.setFromValue(1.0);
 			fadeTransition.setToValue(0);
 
@@ -526,13 +501,13 @@ public class Board extends Application {
 			gameStatus.setTextFill(winnerColor.darker());
 		});
 
-		TranslateTransition moveText = new TranslateTransition(Duration.millis(500), winner);
+		TranslateTransition moveText = new TranslateTransition(Duration.millis(500*animationSpeed), winner);
 		moveText.setFromX(d*sceneSize);
 		moveText.setToX(0);
 		moveText.setInterpolator(Interpolator.EASE_OUT);
 
 
-		ScaleTransition growText = new ScaleTransition(Duration.millis(1000), winner);
+		ScaleTransition growText = new ScaleTransition(Duration.millis(1000*animationSpeed), winner);
 		growText.setFromX(1.0);
 		growText.setFromY(1.0);
 		growText.setToX(2.0);
@@ -606,7 +581,7 @@ public class Board extends Application {
 
 		for (Pane g : glows){
 			// Create the FadeTransition to fade in the shadow
-			FadeTransition fade = new FadeTransition(Duration.millis(1000), g);
+			FadeTransition fade = new FadeTransition(Duration.millis(1000*animationSpeed), g);
 			fade.setFromValue(0); // Start fully transparent
 			fade.setToValue(1); // Fade to fully opaque
 			fade.setInterpolator(Interpolator.EASE_IN);
@@ -668,12 +643,6 @@ public class Board extends Application {
 		this.oppPlayerPanel = (this.oppPlayerPanel.getPlayerColor() == blue) ? this.redPanel : this.bluePanel;
 	}
 
-
-
-	public static void main(String[] args) {
-		launch(args);
-	}
-
 	public boolean isRunningAnimation() {
 		return runningAnimation;
 	}
@@ -682,11 +651,16 @@ public class Board extends Application {
 		this.runningAnimation = runningAnimation;
 	}
 
-	public boolean isAnimateOff() {
-		return animateOff;
+	public double getAnimationSpeed() {
+		return animationSpeed;
 	}
 
-	public void setAnimateOff(boolean animateOff) {
-		this.animateOff = animateOff;
+	public void setAnimationSpeed(double animationSpeed) {
+		this.animationSpeed = animationSpeed;
 	}
+
+	public static void main(String[] args) {
+		launch(args);
+	}
+
 }

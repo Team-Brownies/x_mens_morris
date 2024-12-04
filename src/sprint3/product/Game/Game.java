@@ -100,14 +100,6 @@ public abstract class Game {
 
 		for (int[] dir : directions) {
 			checkAdjacentValid(dir[0], dir[1], coords);
-//			//left
-//			checkAdjacentValid(1, 0, coords);
-//			//right
-//			checkAdjacentValid(-1, 0, coords);
-//			//up
-//			checkAdjacentValid(0, 1, coords);
-//			//down
-//			checkAdjacentValid(0, -1, coords);
 		}
 	}
 
@@ -180,7 +172,7 @@ public abstract class Game {
 	private void updateGameState(){
 		updateGameStatePerPlayer(redPlayer);
 		updateGameStatePerPlayer(bluePlayer);
-	};
+	}
 
 	// changes turn to next player and updates
 	public void changeTurn() {
@@ -236,14 +228,14 @@ public abstract class Game {
 		if(state == GameState.MOVING || state == GameState.FLYING) {
 			if (this.turnPlayer.totalNumberOfPieces() < 3 || !this.turnPlayer.canPiecesMove()) {
 				gameOver(GameState.GAMEOVER);
-				gameHistory.close();
 			}
 			else if (this.turnPlayer.totalNumberOfPieces()==3
 					&& this.opponentPlayer.totalNumberOfPieces()==3
 				    && !this.turnPlayer.canWinThisTurn()
 			){
+				System.out.println(this.turnPlayer.getColor());
+				System.out.println("draw");
 				gameOver(GameState.DRAW);
-				gameHistory.close();
 			}
 		}
 	}
@@ -263,6 +255,8 @@ public abstract class Game {
 				default -> "";
 			});
 		}
+		System.out.println(grid[4][3]);
+		gameHistory.writeMoves();
 	}
 
 
@@ -316,10 +310,6 @@ public abstract class Game {
         return gameHistory;
     }
 
-    public void setGameHistory(GameHistory gameHistory) {
-        this.gameHistory = gameHistory;
-    }
-
 	public void endGame() {
 		this.endingGame=true;
 	}
@@ -355,6 +345,4 @@ public abstract class Game {
 				.map(Cell[]::clone)
 				.toArray(Cell[][]::new);
 	}
-
-
 }

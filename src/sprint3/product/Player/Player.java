@@ -138,18 +138,16 @@ public abstract class Player {
                 GameSpace animateGP = gui.getGameSpace(row, col);
                 GameSpace movingGP = gui.getGameSpace(movingRow, movingCol);
                 animateGP.animateMovePiece(() -> {
-                    //place on new game space
-                    placePiece(row, col);
-                    assert gp != null;
                     //update pieces Location
                     gp.setLocation(row, col);
+                    //place on new game space
+                    placePiece(row, col);
                 }, movingGP);
             } else {
-                //place on new game space
-                placePiece(row, col);
-                assert gp != null;
                 //update pieces Location
                 gp.setLocation(row, col);
+                //place on new game space
+                placePiece(row, col);
             }
         }
     }
@@ -244,7 +242,6 @@ public abstract class Player {
     }
     // searches for a player's GamePiece with the given ID
     public int[] getGamePieceCoordsById(String id) {
-        System.out.println(id);
         for (GamePiece p : boardPieces){
             if (p.getPieceById(id))
                 return p.getLocation();
@@ -262,11 +259,7 @@ public abstract class Player {
     public boolean canPiecesMove(){
         List<GamePiece> movablePieces = playersMovablePieces(this);
 
-        if(movablePieces.isEmpty() && numberOfGamePieces()==0) {
-            System.out.println(color+" color has no movable pieces.");
-            return false;
-        }
-        return true;
+        return !movablePieces.isEmpty() || numberOfGamePieces() != 0;
     }
 
     public boolean canWinThisTurn(){

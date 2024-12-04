@@ -33,10 +33,7 @@ public class CheckMill {
         int inCommonIndex = findCommonIndex(sortedMillMates);
 
         int nonCommonIndex = (inCommonIndex==0) ? 1:0;
-        System.out.println(nonCommonIndex);
         sortedMillMates.sort(Comparator.comparingInt(arr -> arr[nonCommonIndex]));
-        System.out.println("Sorted MILL");
-        sortedMillMates.forEach(o -> System.out.println(Arrays.toString(o)));
 
         return sortedMillMates;
     }

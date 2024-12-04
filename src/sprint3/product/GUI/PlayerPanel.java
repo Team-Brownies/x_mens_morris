@@ -129,7 +129,6 @@ public class PlayerPanel extends Pane {
                 "-fx-alignment: center;" +
                 "-fx-text-fill: " +
                 toRGBCode(playerColor.darker()) + ";");
-//        updatePlayerStatus();
 
         gameStatus.setMinWidth(this.width);
         getChildren().add(gameStatus);
