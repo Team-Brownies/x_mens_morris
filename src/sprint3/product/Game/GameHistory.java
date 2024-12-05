@@ -18,10 +18,10 @@ import com.google.gson.JsonParser;
 
 
 public class GameHistory {
-    private BufferedWriter gameLogWriter;
-    private List<String> moveList = new ArrayList<>();
     private static final String TMP_FILE_PATH = "savedGames/tmp.txt";
     private static final String LOG_FILE_PATH = "savedGames/gamelog.txt";
+    private BufferedWriter gameLogWriter;
+    private List<String> moveList = new ArrayList<>();
     private GameMode replayGameMode;
     private JsonArray replayPiecesArray;
 

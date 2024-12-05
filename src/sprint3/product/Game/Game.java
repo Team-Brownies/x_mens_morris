@@ -8,9 +8,9 @@ import sprint3.product.Player.Player;
 import java.util.*;
 
 public abstract class Game {
+	private final int SIZE;
 	private int pieces;
 	private Cell[][] grid;
-	private final int size;
 	private Player redPlayer;
 	private Player bluePlayer;
 	private Player turnPlayer;
@@ -21,9 +21,9 @@ public abstract class Game {
 	private boolean deletedGame;
 
 	public Game(int pieces, int size, GameMode gameMode) {
-		this.size = size;
+		this.SIZE = size;
 		this.pieces = pieces;
-        this.grid = new Cell[this.size][this.size];
+        this.grid = new Cell[this.SIZE][this.SIZE];
 		this.endingGame=false;
 		this.deletedGame=false;
 		gameHistory.setGameMode(gameMode);
@@ -46,27 +46,32 @@ public abstract class Game {
 
 	// Mark gameSpaces as INVALID and EMPTY based on there position
 	public void setValid() {
-		int middle = (this.size-1)/2;
-		for (int row = 0; row < this.size; ++row) {
-			for (int col = 0; col < this.size; ++col) {
+		int middle = (this.SIZE -1)/2;
+		for (int row = 0; row < this.SIZE; ++row) {
+			for (int col = 0; col < this.SIZE; ++col) {
 				//Makes diagonal cells and the middle rows and columns valid spaces
-				if (row == col || row == (this.size-1-col) || row == middle || col == middle)
+				if (row == col || row == (this.SIZE -1-col) || row == middle || col == middle) {
 					this.grid[row][col] = Cell.EMPTY;
-				else
+				}
+				else {
 					this.grid[row][col] = Cell.INVALID;
+				}
 				//Makes middle cell null
-				if (row == middle && col == middle)
+				if (row == middle && col == middle) {
 					this.grid[row][col] = null;
+				}
 			}
 		}
 	}
 
 	// Returns the Cell class for the gameSpace on the grid based on position
 	public Cell getCell(int row, int column) {
-		if (row >= 0 && row < this.size && column >= 0 && column < this.size)
+		if (row >= 0 && row < this.SIZE && column >= 0 && column < this.SIZE) {
 			return this.grid[row][column];
-		else
+		}
+		else {
 			return null;
+		}
 	}
 
 	// Returns grid
@@ -91,7 +96,7 @@ public abstract class Game {
 
 	// Returns the board size
 	public int getSize() {
-		return this.size;
+		return this.SIZE;
 	}
 
 	// Finds the game spaces that are adjacent to game space with given coords
@@ -112,7 +117,7 @@ public abstract class Game {
 		for (int i = 1; i <= 3; i++) {
 			xMagnitude = col+(i*xDirection);
 			yMagnitude = row+(i*yDirection);
-			if(getCell(yMagnitude, xMagnitude) == Cell.EMPTY) {
+			if (getCell(yMagnitude, xMagnitude) == Cell.EMPTY) {
 				this.grid[yMagnitude][xMagnitude] = Cell.MOVEVALID;
 				break;
 			}
@@ -124,8 +129,9 @@ public abstract class Game {
 	// Gets cell name for make a move in a moving or flying state
 	public boolean movingOrFlying(int row, int col){
         if (Objects.requireNonNull(this.turnPlayer.getPlayersGamestate()) == GameState.FLYING) {
-            if (this.getCell(row, col) == Cell.EMPTY)
-                return true;
+            if (this.getCell(row, col) == Cell.EMPTY) {
+				return true;
+			}
         }
         return this.getCell(row, col) == Cell.MOVEVALID;
     }
@@ -149,8 +155,8 @@ public abstract class Game {
 		Cell[][] grid = this.getGrid();
 		List<int[]> cells = new ArrayList<>();
 
-		for (int row = 0; row < this.size; row++) {
-			for (int col = 0; col < this.size; col++) {
+		for (int row = 0; row < this.SIZE; row++) {
+			for (int col = 0; col < this.SIZE; col++) {
 				if (grid[row][col] == cellType) {
 					cells.add(new int[]{row, col});
 				}
@@ -160,13 +166,14 @@ public abstract class Game {
 	}
 	// Updated the game spaces to check for adjacent game spaces
 	public void clearMoveValid(){
-		for (int row = 0; row < this.size; ++row)
-			for (int col = 0; col < this.size; ++col)
-				if(getCell(row, col) == Cell.MOVEVALID)
+		for (int row = 0; row < this.SIZE; ++row)
+			for (int col = 0; col < this.SIZE; ++col)
+				if (getCell(row, col) == Cell.MOVEVALID) {
 					this.grid[row][col] = Cell.EMPTY;
+				}
 	}
 
-	// update a player game state based on  the board pieces
+	// update a player game state based on the board pieces
 	public abstract void updateGameStatePerPlayer(Player player);
 
 	private void updateGameState(){
@@ -225,7 +232,7 @@ public abstract class Game {
 	// check to see if the game has ended
 	public void checkForGameOver() {
 		GameState state = this.turnPlayer.getPlayersGamestate();
-		if(state == GameState.MOVING || state == GameState.FLYING) {
+		if (state == GameState.MOVING || state == GameState.FLYING) {
 			if (this.turnPlayer.totalNumberOfPieces() < 3 || !this.turnPlayer.canPiecesMove()) {
 				gameOver(GameState.GAMEOVER);
 			}
@@ -258,7 +265,6 @@ public abstract class Game {
 		System.out.println(grid[4][3]);
 		gameHistory.writeMoves();
 	}
-
 
 	// check to see if a game piece can be placed based on location of board space
 	public boolean canPlacePiece(int row, int col) {
@@ -296,8 +302,8 @@ public abstract class Game {
 	public List<int[]> getCellsByCellType(Cell cellType){
 		Cell[][] grid = this.getGrid();
 		List<int[]> cells = new ArrayList<>();
-		for (int row = 0; row < this.size; row++) {
-			for (int col = 0; col < this.size; col++) {
+		for (int row = 0; row < this.SIZE; row++) {
+			for (int col = 0; col < this.SIZE; col++) {
 				if (grid[row][col] == cellType) {
 					cells.add(new int[]{row, col});
 				}

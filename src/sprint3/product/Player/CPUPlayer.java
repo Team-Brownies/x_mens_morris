@@ -13,14 +13,14 @@ public class CPUPlayer extends Player{
     private enum Difficulty {
         EASY, NORMAL, HARD
     }
-    private final Game game;
+    private final Game GAME;
     private Difficulty difficulty;
 
     // changes player so a cpu can control
     public CPUPlayer(char color, Game game, int difficulty) {
         super(color, game);
         setCpu(true);
-        this.game = this.getGame();
+        this.GAME = this.getGame();
         setDifficulty(difficulty);
     }
 
@@ -39,8 +39,6 @@ public class CPUPlayer extends Player{
         };
     }
 
-
-
     // generates random number to pick from list of valid moves
     private int getRandom(int n){
         int random;
@@ -55,15 +53,15 @@ public class CPUPlayer extends Player{
         int[] blockMove = null;
         int[] randomMove;
 
-        List<int[]> possibleMoves = game.getAllCellsOfAType(Cell.EMPTY);
-        possibleMoves.addAll(game.getAllCellsOfAType(Cell.MOVEVALID));
+        List<int[]> possibleMoves = GAME.getAllCellsOfAType(Cell.EMPTY);
+        possibleMoves.addAll(GAME.getAllCellsOfAType(Cell.MOVEVALID));
 
         //Find if Mill can be formed
         for (int[] move : possibleMoves ) {
-            millMove = findMillMove(move, game.makeTempGrid(), this.getPlayerTag());
+            millMove = findMillMove(move, GAME.makeTempGrid(), this.getPlayerTag());
             if (blockMove == null) {
                 //Saves a block move for later
-                Cell[][] tempGrid = game.makeTempGrid();
+                Cell[][] tempGrid = GAME.makeTempGrid();
                 blockMove = findMillMove(move, tempGrid, this.getOpponentTag());
             }
             //Form First Mill found
@@ -100,13 +98,12 @@ public class CPUPlayer extends Player{
         return getMoveBaseOnDifficulty(millMove, blockMove, randomMove);
     }
 
-
     // generates coords the best remove to make this turn
     private int[] genRemove(){
         int[] removePiece;
         int[] randomRemove = getRandomRemovePiece();
         int[] blockRemove = getNonTrappedRemove();
-        GameState oppGameState = game.getOpponentPlayer().getPlayersGamestate();
+        GameState oppGameState = GAME.getOpponentPlayer().getPlayersGamestate();
 
         removePiece = switch (oppGameState) {
             case PLACING -> getRemovePieceForPlacing();
@@ -114,18 +111,16 @@ public class CPUPlayer extends Player{
             default -> null;
         };
 
-
-
         // remove a piece that can
         return getMoveBaseOnDifficulty(removePiece, blockRemove, randomRemove);
     }
     // returns a random piece that is able to be removed
     private int[] getRandomRemovePiece() {
         List<int[]> oppRemovablePieces = new ArrayList<>();
-        List<int[]> oppGameSpaces = game.getAllCellsOfAType(this.getOpponentTag());
+        List<int[]> oppGameSpaces = GAME.getAllCellsOfAType(this.getOpponentTag());
 
         for (int[] piece:oppGameSpaces){
-            if(validForRemove(piece)){
+            if (validForRemove(piece)) {
                     oppRemovablePieces.add(piece);
             }
         }
@@ -134,13 +129,13 @@ public class CPUPlayer extends Player{
 
     private int[] getNonTrappedRemove(){
         List<int[]> oppRemovablePieces = new ArrayList<>();
-        Player oppPlayer = game.getOpponentPlayer();
+        Player oppPlayer = GAME.getOpponentPlayer();
 
         List<GamePiece> movablePieces = playersMovablePieces(oppPlayer);
 
         for (GamePiece piece:movablePieces){
             int[] loc = piece.getLocation();
-            if(validForRemove(loc)){
+            if (validForRemove(loc)) {
                 oppRemovablePieces.add(loc);
             }
         }
@@ -149,27 +144,28 @@ public class CPUPlayer extends Player{
     }
 
     private boolean validForRemove(int[] piece){
-        CheckMill gameMillChecker = new CheckMill(game.getGrid());
+        CheckMill gameMillChecker = new CheckMill(GAME.getGrid());
         return !(gameMillChecker.checkMillAllDirections(piece[0], piece[1]) &&
-                game.getOppFreePieces());
+                GAME.getOppFreePieces());
     }
     // return a mill mate of a mill the Opponent could make there next turn (during placing phase)
     private int[] getRemovePieceForPlacing() {
-        List<int[]> possibleMoves = game.getAllCellsOfAType(Cell.EMPTY);
-        possibleMoves.addAll(game.getAllCellsOfAType(Cell.MOVEVALID));
+        List<int[]> possibleMoves = GAME.getAllCellsOfAType(Cell.EMPTY);
+        possibleMoves.addAll(GAME.getAllCellsOfAType(Cell.MOVEVALID));
         int[] oppMillMove = null;
 
         //Find if Mill can be formed by Opponent Next Turn
         for (int[] move : possibleMoves ) {
-            oppMillMove = findMillMove(move, game.makeTempGrid(), this.getOpponentTag());
-            if (oppMillMove!= null)
+            oppMillMove = findMillMove(move, GAME.makeTempGrid(), this.getOpponentTag());
+            if (oppMillMove!= null) {
                 break;
+            }
         }
         return getMillMatesForRemove(oppMillMove);
     }
     // return a mill mate of a mill the Opponent could make there next turn (during moving phase)
     private int[] getRemovePieceForMoving(){
-        int[][] possibleMillMove = findMillOrBlock(this.game.getOpponentPlayer(), "Mill");
+        int[][] possibleMillMove = findMillOrBlock(this.GAME.getOpponentPlayer(), "Mill");
 
         return getMillMatesForRemove(possibleMillMove);
     }
@@ -180,9 +176,9 @@ public class CPUPlayer extends Player{
     // return a mill mate of a mill the Opponent could make there next turn
     private int[] getMillMatesForRemove(int[][] possibleMillMove){
         int[] removePiece = null;
-        Cell[][] tempGrid = game.makeTempGrid();
+        Cell[][] tempGrid = GAME.makeTempGrid();
         CheckMill testMillChecker = new CheckMill(tempGrid);
-        CheckMill gameMillChecker = new CheckMill(game.getGrid());
+        CheckMill gameMillChecker = new CheckMill(GAME.getGrid());
         Set<int[]> millMates = new HashSet<>();
         Cell oppTag = this.getOpponentTag();
 

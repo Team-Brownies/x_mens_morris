@@ -27,14 +27,14 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public class Board extends Application {
-	private final double sceneSize = 450;
-	private final GameMode gameType;
-	private final boolean isReplay;
-	private final PlayerType redType;
-	private final PlayerType blueType;
-	private final NewGameScreen gameMenu;
-	private final JsonArray moveArray;
-	private final Main replayPage;
+	private final double SCENCE_SIZE = 450;
+	private final boolean ISREPLAY;
+	private final GameMode GAME_TYPE;
+	private final PlayerType RED_TYPE;
+	private final PlayerType BLUE_TYPE;
+	private final NewGameScreen GAME_MENU;
+	private final JsonArray MOVE_ARRAY;
+	private final Main REPLAY_PAGE;
 	private GameSpace[][] gameSpaces;
 	private PlayerPanel redPanel;
 	private PlayerPanel bluePanel;
@@ -62,30 +62,30 @@ public class Board extends Application {
             int blueDifficulty,
             NewGameScreen gameMenu
     ) {
-		this.gameType = gameType;
-        this.isReplay=false;
-		this.moveArray = null;
-        this.redType = redType;
-        this.blueType = blueType;
+		this.GAME_TYPE = gameType;
+        this.ISREPLAY =false;
+		this.MOVE_ARRAY = null;
+        this.RED_TYPE = redType;
+        this.BLUE_TYPE = blueType;
 		this.redDifficulty = redDifficulty;
 		this.blueDifficulty = blueDifficulty;
-		this.gameMenu = gameMenu;
-		this.replayPage = null;
+		this.GAME_MENU = gameMenu;
+		this.REPLAY_PAGE = null;
     }
-	public Board(GameMode gameType, JsonArray moveArray, Main replayPage) {
-        this.gameType = gameType;
-		this.isReplay=true;
-		this.redType = PlayerType.SCRIPTED;
-		this.blueType = PlayerType.SCRIPTED;
-		this.gameMenu = null;
-		this.replayPage = replayPage;
-		this.moveArray = moveArray;
+	public Board(GameMode GAME_TYPE, JsonArray moveArray, Main replayPage) {
+        this.GAME_TYPE = GAME_TYPE;
+		this.ISREPLAY =true;
+		this.RED_TYPE = PlayerType.SCRIPTED;
+		this.BLUE_TYPE = PlayerType.SCRIPTED;
+		this.GAME_MENU = null;
+		this.REPLAY_PAGE = replayPage;
+		this.MOVE_ARRAY = moveArray;
 	}
 
 	@Override
 	public void start(Stage primaryStage) {
 
-		double playerPaneSize = sceneSize/3;
+		double playerPaneSize = SCENCE_SIZE /3;
 		if (game == null) {
 			loadGameType();
 			setPlayers();
@@ -119,8 +119,8 @@ public class Board extends Application {
 		// Restart button
 		Button restartButton = new Button("Restart");
 		restartButton.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Arial';");
-		if (!isReplay)
-			restartButton.setOnAction(e -> restartGame(gameMenu));
+		if (!ISREPLAY)
+			restartButton.setOnAction(e -> restartGame(GAME_MENU));
 		else
 			restartButton.setOnAction(e -> restartReplay());
 		// Create the options layout (HBox) // 20px space between children (you can adjust)
@@ -137,8 +137,8 @@ public class Board extends Application {
 		);
 		optionsLayout.getChildren().add(speedButton);
 
-		if(isReplay)
-			addReplayControls(optionsLayout, sceneSize-(optionsLayout.getSpacing()*2));
+		if(ISREPLAY)
+			addReplayControls(optionsLayout, SCENCE_SIZE -(optionsLayout.getSpacing()*2));
 		else {
 			Region spacer = new Region();
 			HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -161,8 +161,8 @@ public class Board extends Application {
 		optionsLayout.setMinHeight(50);
 		gameStatus.setMinHeight(50);
 
-		gameStatus.setMinWidth(sceneSize+(playerPaneSize*2));
-		Scene scene = new Scene(mainPane, sceneSize+(playerPaneSize*2), sceneSize+100);
+		gameStatus.setMinWidth(SCENCE_SIZE +(playerPaneSize*2));
+		Scene scene = new Scene(mainPane, SCENCE_SIZE +(playerPaneSize*2), SCENCE_SIZE +100);
 		primaryStage.setTitle("Nine Men's Morris");
 		primaryStage.setScene(scene);
 		primaryStage.show();
@@ -179,7 +179,7 @@ public class Board extends Application {
 
 	private void addReplayControls(HBox optionsLayout, double size) {
 		Region spacer = new Region();
-		this.replayControls = new ReplayControls(moveArray, size, this);
+		this.replayControls = new ReplayControls(MOVE_ARRAY, size, this);
 
 		HBox.setHgrow(spacer, Priority.ALWAYS);
 		optionsLayout.getChildren().addAll(spacer, replayControls);
@@ -190,17 +190,17 @@ public class Board extends Application {
 	}
 
 	private void setPlayers() {
-		if (isReplay){
-			game.setRedPlayer(new ScriptedPlayer('R', game, moveArray, this));
-			game.setBluePlayer(new ScriptedPlayer('B', game, moveArray, this));
+		if (ISREPLAY){
+			game.setRedPlayer(new ScriptedPlayer('R', game, MOVE_ARRAY, this));
+			game.setBluePlayer(new ScriptedPlayer('B', game, MOVE_ARRAY, this));
 		} else {
-			game.setRedPlayer((redType==PlayerType.CPU) ? new CPUPlayer('R', game, this.redDifficulty) : new HumanPlayer('R', game));
-			game.setBluePlayer((blueType==PlayerType.CPU) ? new CPUPlayer('B', game, this.blueDifficulty) : new HumanPlayer('B', game));
+			game.setRedPlayer((RED_TYPE ==PlayerType.CPU) ? new CPUPlayer('R', game, this.redDifficulty) : new HumanPlayer('R', game));
+			game.setBluePlayer((BLUE_TYPE ==PlayerType.CPU) ? new CPUPlayer('B', game, this.blueDifficulty) : new HumanPlayer('B', game));
 		}
 	}
 
 	private void loadGameType() {
-		switch(gameType) {
+		switch(GAME_TYPE) {
 			case NINE:
 				game = new NineMMGame();
 				break;
@@ -211,8 +211,8 @@ public class Board extends Application {
 	}
 
 	private void setUpPlayerPanels(double playerPaneSize) {
-		redPanel = new PlayerPanel(playerPaneSize, red, blue, game.getRedPlayer(), redType);
-		bluePanel = new PlayerPanel(playerPaneSize, blue, red, game.getBluePlayer(), blueType);
+		redPanel = new PlayerPanel(playerPaneSize, red, blue, game.getRedPlayer(), RED_TYPE);
+		bluePanel = new PlayerPanel(playerPaneSize, blue, red, game.getBluePlayer(), BLUE_TYPE);
 
 		turnPlayerPanel = redPanel;
 		oppPlayerPanel = bluePanel;
@@ -290,7 +290,7 @@ public class Board extends Application {
 
 	public void restartReplay() {
 		game.endGame();
-        replayPage.viewReplay();
+        REPLAY_PAGE.viewReplay();
 
 		System.gc();
 	}
@@ -470,8 +470,9 @@ public class Board extends Application {
 		int middle = (this.gameSize-1)/2;
 		double gameSpaceSize = this.getGameSpace(0, 0).getWidth();
 
-		if (winnerColor==red ||winnerColor==blue)
-			winner.setText(getColorName(winnerColor)+"\n"+"Wins");
+		if (winnerColor==red ||winnerColor==blue) {
+			winner.setText(getColorName(winnerColor) + "\n" + "Wins");
+		}
 		else {
 			winner.setText("Draw");
 		}
@@ -501,7 +502,7 @@ public class Board extends Application {
 		});
 
 		TranslateTransition moveText = new TranslateTransition(Duration.millis(500*animationSpeed), winner);
-		moveText.setFromX(d*sceneSize);
+		moveText.setFromX(d* SCENCE_SIZE);
 		moveText.setToX(0);
 		moveText.setInterpolator(Interpolator.EASE_OUT);
 
@@ -563,7 +564,7 @@ public class Board extends Application {
 		}
 
 		countdownSequence.play();
-		countdownSequence.setOnFinished(_->restartGame(gameMenu));
+		countdownSequence.setOnFinished(_->restartGame(GAME_MENU));
 	}
 
 	private SequentialTransition animateGlowEffect(Color winnerColor) {

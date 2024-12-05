@@ -29,8 +29,9 @@ public class ScriptedPlayer extends Player{
             board.restartReplay();
         }
         while (!moved && playing && turnNumber<=this.playTo) {
-            if (turnNumber==this.playTo)
+            if (turnNumber==this.playTo) {
                 board.setAnimationSpeed(1);
+            }
             switch (gameState) {
                 case PLACING:
                     if (playerMove(turnNumber)) {

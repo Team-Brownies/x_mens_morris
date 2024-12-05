@@ -12,10 +12,10 @@ import sprint3.product.Player.Player;
 import java.util.Random;
 
 public class PlayerPanel extends Pane {
-    private final double width;
-    private final double height;
-    private final double iconSize;
-    private final double gamePieceSize;
+    private final double WIDTH;
+    private final double HEIGHT;
+    private final double ICON_SIZE;
+    private final double GAMEPIECE_SIZE;
     private GridPane pieceQueue = new GridPane();
     private Pane captureSpace = new Pane();
     private Color playerColor;
@@ -27,13 +27,13 @@ public class PlayerPanel extends Pane {
     private String playerLabel;
 
     public PlayerPanel(double playerPaneSize, Color playerColor, Color oppColor, Player player, PlayerType playerType) {
-        this.width = playerPaneSize;
-        this.height = playerPaneSize*3;
+        this.WIDTH = playerPaneSize;
+        this.HEIGHT = playerPaneSize*3;
         this.playerColor = playerColor;
         this.oppColor = oppColor;
         this.player = player;
-        this.iconSize = this.width / 3;
-        this.gamePieceSize = this.width/10;
+        this.ICON_SIZE = this.WIDTH / 3;
+        this.GAMEPIECE_SIZE = this.WIDTH /10;
         this.playerType = playerType;
 
         setMouseTransparent(true);
@@ -46,12 +46,12 @@ public class PlayerPanel extends Pane {
 
         this.setStyle("-fx-background-color: lightgrey;");
 
-        this.setPrefSize(this.width, this.height);
+        this.setPrefSize(this.WIDTH, this.HEIGHT);
     }
 
     private void addGlow(){
         glowPane.setStyle("-fx-background-color: lightgrey;");
-        glowPane.setPrefSize(this.width, this.height);
+        glowPane.setPrefSize(this.WIDTH, this.HEIGHT);
 
         glowPane.setLayoutX(0);
 
@@ -71,10 +71,12 @@ public class PlayerPanel extends Pane {
         glowPane.setEffect(turnGlow);
     }
     public void setGlowVisible(boolean isVisible){
-        if (isVisible)
+        if (isVisible) {
             turnGlow.setColor(playerColor.brighter());
-        else
+        }
+        else {
             turnGlow.setColor(Color.TRANSPARENT);
+        }
     }
 
     private void addIcon() {
@@ -97,13 +99,13 @@ public class PlayerPanel extends Pane {
         }
 
         double iconStartingSize = icon.getBoundsInLocal().getWidth();
-        icon.setScaleX((this.iconSize / iconStartingSize)*sizeMult);
-        icon.setScaleY((this.iconSize / iconStartingSize)*sizeMult);
+        icon.setScaleX((this.ICON_SIZE / iconStartingSize)*sizeMult);
+        icon.setScaleY((this.ICON_SIZE / iconStartingSize)*sizeMult);
 
         icon.setFill(playerColor);
 
-        icon.setLayoutX((this.width - iconStartingSize) / 2);
-        icon.setLayoutY(this.iconSize / 2);
+        icon.setLayoutX((this.WIDTH - iconStartingSize) / 2);
+        icon.setLayoutY(this.ICON_SIZE / 2);
 
         icon.setFill(playerColor);
         getChildren().add(icon);
@@ -117,7 +119,7 @@ public class PlayerPanel extends Pane {
     private void playerStatus(){
         Label gameStatus = new Label("");
         gameStatus.setText(playerLabel+"\nPlayer");
-        gameStatus.setLayoutY(this.iconSize + 10);
+        gameStatus.setLayoutY(this.ICON_SIZE + 10);
         gameStatus.setStyle(
                 "-fx-font-size: 14px; " +
                 "-fx-font-size: 14px; " +
@@ -127,11 +129,11 @@ public class PlayerPanel extends Pane {
                 "-fx-text-fill: " +
                 toRGBCode(playerColor.darker()) + ";");
 
-        gameStatus.setMinWidth(this.width);
+        gameStatus.setMinWidth(this.WIDTH);
         getChildren().add(gameStatus);
     }
     private Circle drawGamePiece(Color color) {
-        Circle gamePiece = new Circle(gamePieceSize, color);
+        Circle gamePiece = new Circle(GAMEPIECE_SIZE, color);
         gamePiece.setStroke(color.darker());
         gamePiece.setStrokeWidth(2.0);
         return gamePiece;
@@ -162,18 +164,18 @@ public class PlayerPanel extends Pane {
         Platform.runLater(() -> {
             double pieceQueueWidth = this.pieceQueue.getWidth();
 
-            this.pieceQueue.setLayoutX(((this.width - pieceQueueWidth) / 2)+pieceShift);
-            this.pieceQueue.setLayoutY(this.iconSize*2);
+            this.pieceQueue.setLayoutX(((this.WIDTH - pieceQueueWidth) / 2)+pieceShift);
+            this.pieceQueue.setLayoutY(this.ICON_SIZE *2);
         });
     }
 
     private void drawCaptureSpace(){
-        double height = this.height / 3;
-        this.captureSpace.setPrefSize(this.width, height);
+        double height = this.HEIGHT / 3;
+        this.captureSpace.setPrefSize(this.WIDTH, height);
 
         this.captureSpace.setLayoutX(0);
 
-        this.captureSpace.setLayoutY(this.height - height);
+        this.captureSpace.setLayoutY(this.HEIGHT - height);
 
         getChildren().add(this.captureSpace);
     }
@@ -190,8 +192,8 @@ public class PlayerPanel extends Pane {
 
     public Circle addToCaptureSpace(){
         Circle gp = drawGamePiece(this.oppColor);
-        int min = (int) (gamePieceSize*3);
-        int max = (int) (this.width-min);
+        int min = (int) (GAMEPIECE_SIZE *3);
+        int max = (int) (this.WIDTH -min);
 
         gp.setLayoutX(randomDouble(min, max));
         gp.setLayoutY(randomDouble(min, max));
@@ -210,7 +212,7 @@ public class PlayerPanel extends Pane {
 
     public void winnerGlow(Color color) {
         Pane pane = new Pane();
-        pane.setPrefSize(this.width, this.height);
+        pane.setPrefSize(this.WIDTH, this.HEIGHT);
         pane.setStyle("-fx-background-color: lightgrey;");
         getChildren().add(pane);
         pane.toBack();

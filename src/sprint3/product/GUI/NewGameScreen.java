@@ -19,16 +19,14 @@ import java.io.File;
 
 
 public class NewGameScreen {
+    private final PlayerSelector RED_SELECTER = new PlayerSelector('1');
+    private final PlayerSelector BLUE_SELECTER = new PlayerSelector('2');
     private Stage primaryStage;
     private Scene scene;
-
     private Button gridSizeButton5x5;
     private Button gridSizeButton9x9;
-    private final PlayerSelector redSelecter = new PlayerSelector('1');
-    private final PlayerSelector blueSelecter = new PlayerSelector('2');
 
     private Button selectedGridButton;
-//    private PlayerSelecter selectedGameModeButton;
     private GameMode gridSelection = GameMode.NINE;
     // Constructor
     public NewGameScreen(Stage primaryStage) {
@@ -86,14 +84,13 @@ public class NewGameScreen {
         Text gameModeTitle = new Text("Choose Player");
         gameModeTitle.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
         gameModeTitle.setFill(Color.BLACK);
-//        gameModeTitle.setEffect(new DropShadow(3.0, 3.0, 3.0, Color.BLACK)); // Drop shadow for better contrast
 
         // Game mode buttons within a bordered box
         HBox gameModeLayout = new HBox(10);
         gameModeLayout.setAlignment(Pos.CENTER);
         gameModeLayout.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-border-width: 2px; -fx-padding: 10px; -fx-background-radius: 10px;");
 
-        gameModeLayout.getChildren().addAll(redSelecter, blueSelecter);
+        gameModeLayout.getChildren().addAll(RED_SELECTER, BLUE_SELECTER);
 
         // Create a container for the Play button
         Button playButton = createButton("Play Game ➔");
@@ -154,20 +151,19 @@ public class NewGameScreen {
     // Action for choosing game mode (P1 vs P2 or P1 vs PC)
     private boolean chooseGameMode(String gameMode) {
         System.out.println("Game Mode Selected: " + gameMode);
-//        updateButtonStyle(redCPUToggle, blueSelecter, gameMode.equals("P1 vs P2") ? redCPUToggle : blueSelecter);
         return gameMode.equals("P1 vs P2") ? true : false;
     }
 
     // Action for playing the game
     private void playGame() {
-        PlayerType redType = (redSelecter.isSwitchedOn()) ? PlayerType.CPU : PlayerType.HUMAN;
-        PlayerType blueType = (blueSelecter.isSwitchedOn()) ? PlayerType.CPU : PlayerType.HUMAN;
+        PlayerType redType = (RED_SELECTER.getSWITCHED_ON()) ? PlayerType.CPU : PlayerType.HUMAN;
+        PlayerType blueType = (BLUE_SELECTER.getSWITCHED_ON()) ? PlayerType.CPU : PlayerType.HUMAN;
         System.out.println("Starting the game...");
         Board gui = new Board(gridSelection,
                 redType,
                 blueType,
-                redSelecter.getDifficultyValue(),
-                blueSelecter.getDifficultyValue(),
+                RED_SELECTER.getDifficultyValue(),
+                BLUE_SELECTER.getDifficultyValue(),
                 this
         );
         gui.start(primaryStage);

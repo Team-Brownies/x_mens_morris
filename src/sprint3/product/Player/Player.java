@@ -49,13 +49,13 @@ public abstract class Player {
     }
 
     // Get List of pieces that are movable
-    public List<GamePiece> playersMovablePieces(Player player){
+    public List<GamePiece> playersMovablePieces(Player player) {
         List<GamePiece> moveablePieces = new ArrayList<>();
         List<GamePiece> playersBoardPieces = player.getBoardPieces();
         player.updateValidMovesLocations();
-        for (GamePiece piece : playersBoardPieces){
+        for (GamePiece piece : playersBoardPieces) {
             piece.updateValidMovesLocations();
-            if(!piece.getValidMovesLocations().isEmpty()) {
+            if (!piece.getValidMovesLocations().isEmpty()) {
                 moveablePieces.add(piece);
             }
         }
@@ -79,9 +79,10 @@ public abstract class Player {
     // returns the coord of in play game pieces
     public List<int[]> getBoardPiecesCoords() {
         List<int[]> coords = new ArrayList<>();
-        for (GamePiece gp:boardPieces){
-            if (gp.isInPlay())
+        for (GamePiece gp:boardPieces) {
+            if (gp.isInPlay()) {
                 coords.add(gp.getLocation());
+            }
         }
         return coords;
     }
@@ -92,8 +93,8 @@ public abstract class Player {
     }
 
     // debug for testing changes the starting number of pieces to 3 to test flying
-    public void setGamePiecesTo(int number){
-        while(this.numberOfGamePieces()>number){
+    public void setGamePiecesTo(int number) {
+        while(this.numberOfGamePieces()>number) {
             gamePieces.pop();
         }
     }
@@ -101,7 +102,7 @@ public abstract class Player {
     // remove a player's game piece from play and subtract it from the pieceCount
     private void removeBoardPiece(int row, int col) {
         GamePiece gp = this.getGamePieceByLocation(row, col);
-        if(gp!=null) {
+        if (gp!=null) {
             gp.removeFromPlay();
             pieceCount--;
         }
@@ -110,7 +111,7 @@ public abstract class Player {
     // places a game piece on the given coordinates
     public void placePiece(int row, int col) {
         Board gui = game.getGui();
-        if(game.canPlacePiece(row,col)) {
+        if (game.canPlacePiece(row,col)) {
             game.setGrid(row, col, this.playerTag);
             this.setGamePieceStartingLocation(row, col);
             if (this.playersGamestate==GameState.PLACING && gui!=null) {
@@ -130,7 +131,7 @@ public abstract class Player {
         GamePiece gp = this.getGamePieceByLocation(movingRow, movingCol);
         Board gui = game.getGui();
 
-        if(game.canPlacePiece(row,col)) {
+        if (game.canPlacePiece(row,col)) {
             //clear old game space
             game.setGrid(movingRow, movingCol, Cell.EMPTY);
 
@@ -157,12 +158,12 @@ public abstract class Player {
         CheckMill millChecker = new CheckMill(game.getGrid());
         Board gui = game.getGui();
         //only lets player from removing their opponent piece
-        if(game.getCell(row, col) != opponentTag){
+        if (game.getCell(row, col) != opponentTag) {
             return false;
         }
         else{
             //prevent player from removing the pieces in the mill
-            if(millChecker.checkMillAllDirections(row, col) && game.getOppFreePieces()){
+            if (millChecker.checkMillAllDirections(row, col) && game.getOppFreePieces()) {
                 return false;
             }
             else{
@@ -186,7 +187,7 @@ public abstract class Player {
     // and adds in to the piece count
     private void setGamePieceStartingLocation(int row, int col) {
         GamePiece gamePiece;
-        if (gamePieces.peek()!=null){
+        if (gamePieces.peek()!=null) {
             gamePiece = gamePieces.poll();
             gamePiece.setLocation(row, col);
             boardPieces.add(gamePiece);
@@ -230,39 +231,41 @@ public abstract class Player {
     }
 
     // method for CPUPlayer to use
-    public void makeCPUMove(){}
+    public void makeCPUMove() {}
 
     // searches for a player's GamePiece with the given coordinates
     public GamePiece getGamePieceByLocation(int row, int col) {
-        for (GamePiece p : boardPieces){
-            if (p.getPieceByLocation(row, col))
+        for (GamePiece p : boardPieces) {
+            if (p.getPieceByLocation(row, col)) {
                 return p;
+            }
         }
         return null;
     }
     // searches for a player's GamePiece with the given ID
     public int[] getGamePieceCoordsById(String id) {
-        for (GamePiece p : boardPieces){
-            if (p.getPieceById(id))
+        for (GamePiece p : boardPieces) {
+            if (p.getPieceById(id)) {
                 return p.getLocation();
+            }
         }
         return null;
     }
     // updates the valid moves locations of all of player's pieces
-    private void updateValidMovesLocations(){
+    private void updateValidMovesLocations() {
         for (GamePiece p : boardPieces) {
             p.updateValidMovesLocations();
         }
     }
 
     // check to see if the player can move any of their game piece
-    public boolean canPiecesMove(){
+    public boolean canPiecesMove() {
         List<GamePiece> movablePieces = playersMovablePieces(this);
 
         return !movablePieces.isEmpty() || numberOfGamePieces() != 0;
     }
 
-    public boolean canWinThisTurn(){
+    public boolean canWinThisTurn() {
         return findMillOrBlock(this, "Mill")!=null;
     }
 
@@ -275,18 +278,18 @@ public abstract class Player {
         Cell playerTag = player.getPlayerTag();
         Cell oppTag = player.getOpponentTag();
 
-        for (GamePiece piece : movablePieces){
+        for (GamePiece piece : movablePieces) {
             int[] coords = piece.getLocation();
             List<int[]> validMoveSpaces;
 
             piece.updateValidMovesLocations();
             validMoveSpaces = piece.getValidMovesLocations();
 
-            for (int[] newSpace : validMoveSpaces){
+            for (int[] newSpace : validMoveSpaces) {
                 Cell[][] tempGrid = game.makeTempGrid();
                 tempGrid[coords[0]][coords[1]] = Cell.EMPTY;
                 // return Mill if found
-                switch (type){
+                switch (type) {
                     case "Mill":
                         millMove = findMillMove(newSpace, tempGrid, playerTag);
                         // return Mill Move if found
@@ -308,7 +311,7 @@ public abstract class Player {
     }
 
     // find a move that will result in a mill be formed
-    protected int[] findMillMove(int[] move, Cell[][] tempGrid, Cell tag){
+    protected int[] findMillMove(int[] move, Cell[][] tempGrid, Cell tag) {
         CheckMill millChecker;
         tempGrid[move[0]][move[1]] = tag;
 
@@ -321,10 +324,10 @@ public abstract class Player {
     }
 
     public void setGamePiecesToFlying() {
-        for (GamePiece piece:boardPieces){
+        for (GamePiece piece:boardPieces) {
             piece.setCellStateForFlying();
         }
-        for (GamePiece piece:gamePieces){
+        for (GamePiece piece:gamePieces) {
             piece.setCellStateForFlying();
         }
     }

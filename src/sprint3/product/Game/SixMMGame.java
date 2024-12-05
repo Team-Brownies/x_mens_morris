@@ -4,19 +4,21 @@ import sprint3.product.Player.Player;
 
 public class SixMMGame extends Game {
 
-	private static final int pieces = 6;
-	private static final int size = 5;
-	private static final GameMode gameMode = GameMode.SIX;
+	private static final int PIECES = 6;
+	private static final int SIZE = 5;
+	private static final GameMode GAME_MODE = GameMode.SIX;
 
 	public SixMMGame() {
-		super(pieces, size, gameMode);
+		super(PIECES, SIZE, GAME_MODE);
 	}
 
 	// Flying is not used in Six Man's Morris
 	public void updateGameStatePerPlayer(Player player){
-		if (player.numberOfGamePieces() == 0 )
+		if (player.numberOfGamePieces() == 0 ) {
 			player.setPlayersGamestate(GameState.MOVING);
-		if (player.numberOfGamePieces() != 0)
+		}
+		if (player.numberOfGamePieces() != 0) {
 			player.setPlayersGamestate(GameState.PLACING);
+		}
 	}
 }

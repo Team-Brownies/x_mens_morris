@@ -9,10 +9,10 @@ import javafx.scene.control.Slider;
 import javafx.scene.layout.StackPane;
 
 public class PlayerSelector extends StackPane {
-    private final BooleanProperty switchedOn = new SimpleBooleanProperty(false);
-    private final Button humanRadio = new Button("Human");
-    private final Button cpuRadio = new Button("CPU");
-    private final Slider difficulty = new Slider(1, 3, 3);
+    private final BooleanProperty SWITCHED_ON = new SimpleBooleanProperty(false);
+    private final Button HUMAN_RADIO = new Button("Human");
+    private final Button CPU_RADIO = new Button("CPU");
+    private final Slider DIFFICULTY = new Slider(1, 3, 3);
     private int difficultyValue;
 
 
@@ -21,45 +21,45 @@ public class PlayerSelector extends StackPane {
         this.difficultyValue = 3;
         playerLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: black; -fx-padding: 5px;");
 
-        setOn(humanRadio);
-        setOff(cpuRadio);
+        setOn(HUMAN_RADIO);
+        setOff(CPU_RADIO);
 
-        humanRadio.setPrefSize(100, 35);
-        cpuRadio.setPrefSize(100, 35);
+        HUMAN_RADIO.setPrefSize(100, 35);
+        CPU_RADIO.setPrefSize(100, 35);
 
-        humanRadio.setOnAction(_ -> switchValues(false));
-        cpuRadio.setOnAction(_ -> switchValues(true));
+        HUMAN_RADIO.setOnAction(_ -> switchValues(false));
+        CPU_RADIO.setOnAction(_ -> switchValues(true));
 
-        difficulty.setShowTickMarks(true);
-        difficulty.setShowTickLabels(true);
-        difficulty.setMajorTickUnit(1);
-        difficulty.setMinorTickCount(0);
-        difficulty.setBlockIncrement(1);
-        difficulty.setMaxWidth(125);
+        DIFFICULTY.setShowTickMarks(true);
+        DIFFICULTY.setShowTickLabels(true);
+        DIFFICULTY.setMajorTickUnit(1);
+        DIFFICULTY.setMinorTickCount(0);
+        DIFFICULTY.setBlockIncrement(1);
+        DIFFICULTY.setMaxWidth(125);
 
-        difficulty.setVisible(false);
+        DIFFICULTY.setVisible(false);
 
 
-        humanRadio.setText("Human");
-        cpuRadio.setText("CPU");
+        HUMAN_RADIO.setText("Human");
+        CPU_RADIO.setText("CPU");
 
-        getChildren().addAll(playerLabel, humanRadio, cpuRadio, difficulty);
+        getChildren().addAll(playerLabel, HUMAN_RADIO, CPU_RADIO, DIFFICULTY);
 
         StackPane.setAlignment(playerLabel, Pos.TOP_CENTER);
-        StackPane.setAlignment(humanRadio, Pos.CENTER_LEFT);
-        StackPane.setAlignment(cpuRadio, Pos.CENTER_RIGHT);
-        StackPane.setAlignment(difficulty, Pos.BOTTOM_CENTER);
+        StackPane.setAlignment(HUMAN_RADIO, Pos.CENTER_LEFT);
+        StackPane.setAlignment(CPU_RADIO, Pos.CENTER_RIGHT);
+        StackPane.setAlignment(DIFFICULTY, Pos.BOTTOM_CENTER);
 
         StackPane.setMargin(playerLabel, new javafx.geometry.Insets(0, 70, 75, 70));
 
-        difficulty.valueProperty().addListener((_, _, newValue) -> {
+        DIFFICULTY.valueProperty().addListener((_, _, newValue) -> {
             double value = (double) newValue;
             int roundedValue = (int) Math.round(value);
-            difficulty.setValue(roundedValue);
+            DIFFICULTY.setValue(roundedValue);
             this.difficultyValue = roundedValue;
         });
 
-        difficulty.setLabelFormatter(new javafx.util.StringConverter<>() {
+        DIFFICULTY.setLabelFormatter(new javafx.util.StringConverter<>() {
             @Override
             public String toString(Double value) {
                 if (value == 1) return "EASY";
@@ -81,33 +81,32 @@ public class PlayerSelector extends StackPane {
 
     private void switchValues(Boolean value) {
         if (value) {
-            setOn(cpuRadio);
-            setOff(humanRadio);
-            difficulty.setVisible(true);
+            setOn(CPU_RADIO);
+            setOff(HUMAN_RADIO);
+            DIFFICULTY.setVisible(true);
         } else {
-            setOn(humanRadio);
-            setOff(cpuRadio);
-            difficulty.setVisible(false);
+            setOn(HUMAN_RADIO);
+            setOff(CPU_RADIO);
+            DIFFICULTY.setVisible(false);
         }
 
-        setSwitchedOn(value);
+        setSWITCHED_ON(value);
     }
 
     private void setOn(Button button) {
         button.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-background-color: black; -fx-text-fill: white; -fx-padding: 10px 20px; -fx-border-color: white; -fx-border-width: 2px;");
-
     }
 
     private void setOff(Button button) {
         button.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-background-color: white; -fx-text-fill: black; -fx-padding: 10px 20px; -fx-border-color: black; -fx-border-width: 2px;");
     }
 
-    public boolean isSwitchedOn() {
-        return switchedOn.get();
+    public boolean getSWITCHED_ON() {
+        return SWITCHED_ON.get();
     }
 
-    public void setSwitchedOn(boolean value) {
-        switchedOn.set(value);
+    public void setSWITCHED_ON(boolean value) {
+        SWITCHED_ON.set(value);
     }
 
     public int getDifficultyValue() {
